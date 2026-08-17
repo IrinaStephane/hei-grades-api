@@ -59,7 +59,11 @@ public class GroupService {
   public GroupRest create(GroupCreation creation) {
     Promotion promotion = getPromotionOrThrow(creation.getPromotionId());
     Group group =
-        Group.builder().ref(creation.getRef()).path(creation.getPath()).promotion(promotion).build();
+        Group.builder()
+            .ref(creation.getRef())
+            .path(creation.getPath())
+            .promotion(promotion)
+            .build();
     return toRest(groupRepository.save(group));
   }
 
@@ -129,8 +133,7 @@ public class GroupService {
 
   public List<CourseAssignment> getCourseAssignmentsFollowedByStudent(String studentId) {
     getStudentOrThrow(studentId);
-    List<GroupFlow> history =
-        groupFlowRepository.findByStudentIdOrderByFlowDatetimeAsc(studentId);
+    List<GroupFlow> history = groupFlowRepository.findByStudentIdOrderByFlowDatetimeAsc(studentId);
 
     List<CourseAssignment> result = new ArrayList<>();
     Group activeGroup = null;
@@ -141,8 +144,7 @@ public class GroupService {
         activeGroup = event.getGroup();
         activeSince = event.getFlowDatetime();
       } else if (event.getFlowType() == FlowType.LEAVE && activeGroup != null) {
-        result.addAll(
-            courseAssignmentsInPeriod(activeGroup, activeSince, event.getFlowDatetime()));
+        result.addAll(courseAssignmentsInPeriod(activeGroup, activeSince, event.getFlowDatetime()));
         activeGroup = null;
         activeSince = null;
       }
@@ -153,8 +155,7 @@ public class GroupService {
     return result;
   }
 
-  private List<CourseAssignment> courseAssignmentsInPeriod(
-      Group group, Instant from, Instant to) {
+  private List<CourseAssignment> courseAssignmentsInPeriod(Group group, Instant from, Instant to) {
     int fromYear = from.atZone(java.time.ZoneOffset.UTC).getYear();
     int toYear = to.atZone(java.time.ZoneOffset.UTC).getYear();
     return courseAssignmentRepository.findByGroupId(group.getId()).stream()

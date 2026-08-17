@@ -16,4 +16,7 @@ public interface CourseAssignmentRepository extends JpaRepository<CourseAssignme
       String groupId, Integer year, Integer semester);
 
   boolean existsByIdAndTeacherId(String id, String teacherId);
+
+  boolean existsByCourseIdAndTeacherIdAndGroupIdAndYearAndSemester(
+      String courseId, String teacherId, String groupId, Integer year, Integer semester);
 }
