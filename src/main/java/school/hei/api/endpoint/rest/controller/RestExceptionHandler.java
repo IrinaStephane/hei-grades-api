@@ -14,6 +14,7 @@ public class RestExceptionHandler {
     HttpStatus status =
         switch (exception.getType()) {
           case BAD_REQUEST -> HttpStatus.BAD_REQUEST;
+          case UNAUTHORIZED -> HttpStatus.UNAUTHORIZED;
           case NOT_FOUND -> HttpStatus.NOT_FOUND;
           case FORBIDDEN -> HttpStatus.FORBIDDEN;
           case CONFLICT -> HttpStatus.CONFLICT;
