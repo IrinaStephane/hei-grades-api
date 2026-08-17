@@ -34,7 +34,8 @@ class InternalToRestExceptionHandlerTest {
   void method_argument_not_valid_is_400() throws Exception {
     Method method = getClass().getMethod("sample", String.class);
     var parameter = new org.springframework.core.MethodParameter(method, 0);
-    BindingResult bindingResult = new org.springframework.validation.BeanPropertyBindingResult(new Object(), "obj");
+    BindingResult bindingResult =
+        new org.springframework.validation.BeanPropertyBindingResult(new Object(), "obj");
     var exception =
         new org.springframework.web.bind.MethodArgumentNotValidException(parameter, bindingResult);
 
@@ -75,9 +76,15 @@ class InternalToRestExceptionHandlerTest {
 
   @Test
   void forbidden_variants_are_403() {
-    assertEquals(HttpStatus.FORBIDDEN, subject.handleForbidden(new AccessDeniedException("denied")).getStatusCode());
-    assertEquals(HttpStatus.FORBIDDEN, subject.handleForbidden(new BadCredentialsException("denied")).getStatusCode());
-    assertEquals(HttpStatus.FORBIDDEN, subject.handleForbidden(new ForbiddenException("denied")).getStatusCode());
+    assertEquals(
+        HttpStatus.FORBIDDEN,
+        subject.handleForbidden(new AccessDeniedException("denied")).getStatusCode());
+    assertEquals(
+        HttpStatus.FORBIDDEN,
+        subject.handleForbidden(new BadCredentialsException("denied")).getStatusCode());
+    assertEquals(
+        HttpStatus.FORBIDDEN,
+        subject.handleForbidden(new ForbiddenException("denied")).getStatusCode());
   }
 
   @Test
@@ -100,7 +107,9 @@ class InternalToRestExceptionHandlerTest {
 
   @Test
   void lock_acquisition_is_429() {
-    var response = subject.handleLockAcquisitionException(new org.springframework.dao.CannotAcquireLockException("locked"));
+    var response =
+        subject.handleLockAcquisitionException(
+            new org.springframework.dao.CannotAcquireLockException("locked"));
     assertEquals(HttpStatus.TOO_MANY_REQUESTS, response.getStatusCode());
     assertEquals("locked", response.getBody().getMessage());
   }

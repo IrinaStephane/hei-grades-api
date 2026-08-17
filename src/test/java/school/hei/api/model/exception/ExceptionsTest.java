@@ -8,13 +8,14 @@ class ExceptionsTest {
 
   @Test
   void client_exceptions_are_typed_client_exception() {
-    assertEquals(ApiException.ExceptionType.CLIENT_EXCEPTION, new BadRequestException("m").getType());
+    assertEquals(
+        ApiException.ExceptionType.CLIENT_EXCEPTION, new BadRequestException("m").getType());
     assertEquals(ApiException.ExceptionType.CLIENT_EXCEPTION, new ConflictException("m").getType());
-    assertEquals(ApiException.ExceptionType.CLIENT_EXCEPTION, new ForbiddenException("m").getType());
+    assertEquals(
+        ApiException.ExceptionType.CLIENT_EXCEPTION, new ForbiddenException("m").getType());
     assertEquals(ApiException.ExceptionType.CLIENT_EXCEPTION, new NotFoundException("m").getType());
     assertEquals(
-        ApiException.ExceptionType.CLIENT_EXCEPTION,
-        new TooManyRequestsException("m").getType());
+        ApiException.ExceptionType.CLIENT_EXCEPTION, new TooManyRequestsException("m").getType());
     assertEquals(
         ApiException.ExceptionType.CLIENT_EXCEPTION, new UnauthorizedException("m").getType());
   }

@@ -43,7 +43,6 @@ class CustomUserDetailsServiceTest {
     when(userRepository.findByEmail("unknown@hei.school")).thenReturn(Optional.empty());
 
     assertThrows(
-        UsernameNotFoundException.class,
-        () -> subject.loadUserByUsername("unknown@hei.school"));
+        UsernameNotFoundException.class, () -> subject.loadUserByUsername("unknown@hei.school"));
   }
 }

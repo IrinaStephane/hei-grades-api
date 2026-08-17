@@ -47,16 +47,14 @@ class AuthIT extends FacadeITMockedThirdParties {
   void login_wrong_password_is_unauthorized() {
     var response = login("auth-admin@hei.school", "wrong-password", RestException.class);
     assertStatus(HttpStatus.UNAUTHORIZED, response);
-    assertRestException(
-        HttpStatus.UNAUTHORIZED, "Invalid email or password", response.getBody());
+    assertRestException(HttpStatus.UNAUTHORIZED, "Invalid email or password", response.getBody());
   }
 
   @Test
   void login_unknown_email_is_unauthorized() {
     var response = login("unknown@hei.school", "password123", RestException.class);
     assertStatus(HttpStatus.UNAUTHORIZED, response);
-    assertRestException(
-        HttpStatus.UNAUTHORIZED, "Invalid email or password", response.getBody());
+    assertRestException(HttpStatus.UNAUTHORIZED, "Invalid email or password", response.getBody());
   }
 
   @Test

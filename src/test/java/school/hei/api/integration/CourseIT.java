@@ -77,7 +77,9 @@ class CourseIT extends FacadeITMockedThirdParties {
             RestException.class);
     assertStatus(HttpStatus.CONFLICT, response);
     assertRestException(
-        HttpStatus.CONFLICT, "Course " + creation.getCode() + " already exists", response.getBody());
+        HttpStatus.CONFLICT,
+        "Course " + creation.getCode() + " already exists",
+        response.getBody());
   }
 
   @Test
@@ -188,10 +190,7 @@ class CourseIT extends FacadeITMockedThirdParties {
 
   private ResponseEntity<CourseRest> createCourse(String token, CourseCreation creation) {
     return restTemplate.exchange(
-        apiUrl(localPort, "/courses"),
-        HttpMethod.POST,
-        entity(token, creation),
-        CourseRest.class);
+        apiUrl(localPort, "/courses"), HttpMethod.POST, entity(token, creation), CourseRest.class);
   }
 
   private ResponseEntity<CourseRest> getCourseById(String token, String id) {

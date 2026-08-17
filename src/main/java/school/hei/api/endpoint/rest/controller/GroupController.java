@@ -35,7 +35,8 @@ public class GroupController {
 
   @GetMapping
   public List<GroupRest> getGroups(
-      @RequestParam(required = false) String promotionId, @RequestParam(required = false) Path path) {
+      @RequestParam(required = false) String promotionId,
+      @RequestParam(required = false) Path path) {
     return groupMapper.toRest(groupService.getAll(promotionId, path));
   }
 
@@ -53,7 +54,8 @@ public class GroupController {
 
   @PutMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN')")
-  public GroupRest updateGroup(@PathVariable String id, @Valid @RequestBody GroupCreation creation) {
+  public GroupRest updateGroup(
+      @PathVariable String id, @Valid @RequestBody GroupCreation creation) {
     return groupMapper.toRest(groupService.update(id, creation));
   }
 

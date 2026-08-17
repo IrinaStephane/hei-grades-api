@@ -96,9 +96,11 @@ class GroupServiceTest {
   @Test
   void create_group_ok() {
     when(promotionRepository.findById("p1")).thenReturn(Optional.of(aPromotion()));
-    when(groupRepository.save(any(Group.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(groupRepository.save(any(Group.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
 
-    var created = subject.create(GroupCreation.builder().ref("G2").path(Path.EL).promotionId("p1").build());
+    var created =
+        subject.create(GroupCreation.builder().ref("G2").path(Path.EL).promotionId("p1").build());
 
     assertEquals("G2", created.getRef());
     assertEquals(Path.EL, created.getPath());
@@ -111,7 +113,9 @@ class GroupServiceTest {
 
     assertThrows(
         NotFoundException.class,
-        () -> subject.create(GroupCreation.builder().ref("G2").path(Path.EL).promotionId("p1").build()));
+        () ->
+            subject.create(
+                GroupCreation.builder().ref("G2").path(Path.EL).promotionId("p1").build()));
     verify(groupRepository, never()).save(any());
   }
 
@@ -120,10 +124,12 @@ class GroupServiceTest {
     when(groupRepository.findById("g1")).thenReturn(Optional.of(aGroup()));
     when(promotionRepository.findById("p2"))
         .thenReturn(Optional.of(Promotion.builder().id("p2").build()));
-    when(groupRepository.save(any(Group.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(groupRepository.save(any(Group.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
 
     var updated =
-        subject.update("g1", GroupCreation.builder().ref("G9").path(Path.TN).promotionId("p2").build());
+        subject.update(
+            "g1", GroupCreation.builder().ref("G9").path(Path.TN).promotionId("p2").build());
 
     assertEquals("G9", updated.getRef());
     assertEquals(Path.TN, updated.getPath());
@@ -205,7 +211,8 @@ class GroupServiceTest {
         BadRequestException.class,
         () ->
             subject.recordFlow(
-                "g1", GroupFlowCreation.builder().studentId("s1").flowType(FlowType.LEAVE).build()));
+                "g1",
+                GroupFlowCreation.builder().studentId("s1").flowType(FlowType.LEAVE).build()));
   }
 
   @Test
@@ -217,7 +224,8 @@ class GroupServiceTest {
         NotFoundException.class,
         () ->
             subject.recordFlow(
-                "g1", GroupFlowCreation.builder().studentId("nope").flowType(FlowType.JOIN).build()));
+                "g1",
+                GroupFlowCreation.builder().studentId("nope").flowType(FlowType.JOIN).build()));
   }
 
   @Test
@@ -279,17 +287,22 @@ class GroupServiceTest {
                 GroupFlow.builder()
                     .group(group1)
                     .flowType(FlowType.JOIN)
-                    .flowDatetime(LocalDate.of(2025, 3, 1).atStartOfDay().toInstant(java.time.ZoneOffset.UTC))
+                    .flowDatetime(
+                        LocalDate.of(2025, 3, 1).atStartOfDay().toInstant(java.time.ZoneOffset.UTC))
                     .build(),
                 GroupFlow.builder()
                     .group(group1)
                     .flowType(FlowType.LEAVE)
-                    .flowDatetime(LocalDate.of(2025, 5, 15).atStartOfDay().toInstant(java.time.ZoneOffset.UTC))
+                    .flowDatetime(
+                        LocalDate.of(2025, 5, 15)
+                            .atStartOfDay()
+                            .toInstant(java.time.ZoneOffset.UTC))
                     .build(),
                 GroupFlow.builder()
                     .group(group2)
                     .flowType(FlowType.JOIN)
-                    .flowDatetime(LocalDate.of(2025, 8, 1).atStartOfDay().toInstant(java.time.ZoneOffset.UTC))
+                    .flowDatetime(
+                        LocalDate.of(2025, 8, 1).atStartOfDay().toInstant(java.time.ZoneOffset.UTC))
                     .build()));
     var s1Assignment =
         CourseAssignment.builder()
@@ -340,12 +353,7 @@ class GroupServiceTest {
     when(courseAssignmentRepository.findByGroupId("g1"))
         .thenReturn(
             List.of(
-                CourseAssignment.builder()
-                    .id("a1")
-                    .group(group)
-                    .year(2026)
-                    .semester(2)
-                    .build()));
+                CourseAssignment.builder().id("a1").group(group).year(2026).semester(2).build()));
 
     assertEquals(1, subject.getCourseAssignmentsFollowedByStudent("s1").size());
   }

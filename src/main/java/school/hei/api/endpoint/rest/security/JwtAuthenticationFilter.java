@@ -42,9 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // works directly in the controllers
         var authentication =
             new UsernamePasswordAuthenticationToken(
-                userId,
-                null,
-                List.of(new SimpleGrantedAuthority("ROLE_" + role.name())));
+                userId, null, List.of(new SimpleGrantedAuthority("ROLE_" + role.name())));
         SecurityContextHolder.getContext().setAuthentication(authentication);
       }
     }

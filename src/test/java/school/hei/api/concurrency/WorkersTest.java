@@ -31,14 +31,14 @@ class WorkersTest {
   void runs_callables_concurrently() throws InterruptedException {
     var startLatch = new CountDownLatch(1);
     var ready = new CountDownLatch(2);
-    Callable<Integer> waitThenReturn = () -> {
-      ready.countDown();
-      startLatch.await(5, SECONDS);
-      return 42;
-    };
+    Callable<Integer> waitThenReturn =
+        () -> {
+          ready.countDown();
+          startLatch.await(5, SECONDS);
+          return 42;
+        };
 
-    var futureResults =
-        List.of(waitThenReturn, waitThenReturn);
+    var futureResults = List.of(waitThenReturn, waitThenReturn);
 
     Thread executor = new Thread(() -> subject.apply(futureResults));
     executor.start();

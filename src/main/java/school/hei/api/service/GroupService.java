@@ -59,7 +59,11 @@ public class GroupService {
   public Group create(GroupCreation creation) {
     Promotion promotion = getPromotionOrThrow(creation.getPromotionId());
     Group group =
-        Group.builder().ref(creation.getRef()).path(creation.getPath()).promotion(promotion).build();
+        Group.builder()
+            .ref(creation.getRef())
+            .path(creation.getPath())
+            .promotion(promotion)
+            .build();
     return groupRepository.save(group);
   }
 
@@ -125,8 +129,7 @@ public class GroupService {
 
   public List<CourseAssignment> getCourseAssignmentsFollowedByStudent(String studentId) {
     getStudentOrThrow(studentId);
-    List<GroupFlow> history =
-        groupFlowRepository.findByStudentIdOrderByFlowDatetimeAsc(studentId);
+    List<GroupFlow> history = groupFlowRepository.findByStudentIdOrderByFlowDatetimeAsc(studentId);
 
     List<CourseAssignment> result = new ArrayList<>();
     Group activeGroup = null;
@@ -137,8 +140,7 @@ public class GroupService {
         activeGroup = event.getGroup();
         activeSince = event.getFlowDatetime();
       } else if (event.getFlowType() == FlowType.LEAVE && activeGroup != null) {
-        result.addAll(
-            courseAssignmentsInPeriod(activeGroup, activeSince, event.getFlowDatetime()));
+        result.addAll(courseAssignmentsInPeriod(activeGroup, activeSince, event.getFlowDatetime()));
         activeGroup = null;
         activeSince = null;
       }
@@ -149,8 +151,7 @@ public class GroupService {
     return result;
   }
 
-  private List<CourseAssignment> courseAssignmentsInPeriod(
-      Group group, Instant from, Instant to) {
+  private List<CourseAssignment> courseAssignmentsInPeriod(Group group, Instant from, Instant to) {
     return courseAssignmentRepository.findByGroupId(group.getId()).stream()
         .filter(assignment -> overlapsMembershipPeriod(assignment, from, to))
         .toList();

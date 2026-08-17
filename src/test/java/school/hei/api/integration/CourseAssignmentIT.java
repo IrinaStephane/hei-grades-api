@@ -56,9 +56,15 @@ class CourseAssignmentIT extends FacadeITMockedThirdParties {
     teacher = saveUser(Role.TEACHER, "teacher-" + randomUUID() + "@hei.school");
     adminToken = tokenFor(jwtService, admin);
 
-    promotion = promotionRepository.save(Promotion.builder().ref("P-" + randomUUID()).entryYear(2025).build());
-    group = groupRepository.save(Group.builder().ref("G-" + randomUUID()).path(Path.EL).promotion(promotion).build());
-    course = courseRepository.save(Course.builder().code("C-" + randomUUID()).title("Algorithmique").credits(2).build());
+    promotion =
+        promotionRepository.save(
+            Promotion.builder().ref("P-" + randomUUID()).entryYear(2025).build());
+    group =
+        groupRepository.save(
+            Group.builder().ref("G-" + randomUUID()).path(Path.EL).promotion(promotion).build());
+    course =
+        courseRepository.save(
+            Course.builder().code("C-" + randomUUID()).title("Algorithmique").credits(2).build());
     existingAssignment =
         courseAssignmentRepository.save(
             CourseAssignment.builder()
@@ -129,7 +135,9 @@ class CourseAssignmentIT extends FacadeITMockedThirdParties {
             RestException.class);
     assertStatus(HttpStatus.BAD_REQUEST, response);
     assertRestException(
-        HttpStatus.BAD_REQUEST, "User " + student.getId() + " is not a teacher", response.getBody());
+        HttpStatus.BAD_REQUEST,
+        "User " + student.getId() + " is not a teacher",
+        response.getBody());
     userRepository.delete(student);
   }
 
@@ -169,18 +177,21 @@ class CourseAssignmentIT extends FacadeITMockedThirdParties {
             RestException.class);
     assertStatus(HttpStatus.NOT_FOUND, response);
     assertRestException(
-        HttpStatus.NOT_FOUND, "CourseAssignment " + NOT_EXISTING_ID + " not found", response.getBody());
+        HttpStatus.NOT_FOUND,
+        "CourseAssignment " + NOT_EXISTING_ID + " not found",
+        response.getBody());
   }
 
   @Test
   void admin_updates_assignment_ok() {
-    var update = CourseAssignmentCreation.builder()
-        .courseId(course.getId())
-        .teacherId(teacher.getId())
-        .groupId(group.getId())
-        .year(2026)
-        .semester(1)
-        .build();
+    var update =
+        CourseAssignmentCreation.builder()
+            .courseId(course.getId())
+            .teacherId(teacher.getId())
+            .groupId(group.getId())
+            .year(2026)
+            .semester(1)
+            .build();
     var response =
         restTemplate.exchange(
             apiUrl(localPort, "/course_assignments/" + existingAssignment.getId()),
@@ -245,7 +256,8 @@ class CourseAssignmentIT extends FacadeITMockedThirdParties {
         .build();
   }
 
-  private ResponseEntity<CourseAssignmentRest> createAssignment(String token, CourseAssignmentCreation creation) {
+  private ResponseEntity<CourseAssignmentRest> createAssignment(
+      String token, CourseAssignmentCreation creation) {
     return restTemplate.exchange(
         apiUrl(localPort, "/course_assignments"),
         HttpMethod.POST,

@@ -52,8 +52,7 @@ class HealthControllerIT extends FacadeITMockedThirdParties {
 
   @Test
   void health_email_is_ok() {
-    var response =
-        get("/health/email?to=health-check@hei.school", String.class);
+    var response = get("/health/email?to=health-check@hei.school", String.class);
     assertStatus(HttpStatus.OK, response);
   }
 
@@ -65,8 +64,7 @@ class HealthControllerIT extends FacadeITMockedThirdParties {
 
   @Test
   void health_event1_generates_uuids() {
-    var response =
-        get("/health/event1?nbEvent=3&waitInSeconds=0", List.class);
+    var response = get("/health/event1?nbEvent=3&waitInSeconds=0", List.class);
     assertStatus(HttpStatus.OK, response);
     assertEquals(3, response.getBody().size());
   }
@@ -91,7 +89,10 @@ class HealthControllerIT extends FacadeITMockedThirdParties {
 
   private <T> ResponseEntity<T> get(String path, Class<T> responseType) {
     return restTemplate.exchange(
-        apiUrl(localPort, path), HttpMethod.GET, new HttpEntity<>(authHeaders(admin)), responseType);
+        apiUrl(localPort, path),
+        HttpMethod.GET,
+        new HttpEntity<>(authHeaders(admin)),
+        responseType);
   }
 
   private <T> ResponseEntity<T> post(String path, Object body, Class<T> responseType) {

@@ -135,8 +135,7 @@ class UserIT extends FacadeITMockedThirdParties {
 
   @Test
   void admin_updates_user_ok() {
-    var update =
-        UserUpdate.builder().firstName("New").lastName("Name").role(Role.TEACHER).build();
+    var update = UserUpdate.builder().firstName("New").lastName("Name").role(Role.TEACHER).build();
     var response =
         restTemplate.exchange(
             apiUrl(localPort, "/users/" + student.getId()),
@@ -161,7 +160,9 @@ class UserIT extends FacadeITMockedThirdParties {
 
     assertStatus(HttpStatus.CONFLICT, response);
     assertRestException(
-        HttpStatus.CONFLICT, "Email " + admin.getEmail() + " is already in use", response.getBody());
+        HttpStatus.CONFLICT,
+        "Email " + admin.getEmail() + " is already in use",
+        response.getBody());
   }
 
   @Test
@@ -200,10 +201,7 @@ class UserIT extends FacadeITMockedThirdParties {
 
   private ResponseEntity<UserRest> createUser(String token, UserCreation creation) {
     return restTemplate.exchange(
-        apiUrl(localPort, "/users"),
-        HttpMethod.POST,
-        entity(token, creation),
-        UserRest.class);
+        apiUrl(localPort, "/users"), HttpMethod.POST, entity(token, creation), UserRest.class);
   }
 
   private ResponseEntity<List<UserRest>> getUsers(String token, String role) {

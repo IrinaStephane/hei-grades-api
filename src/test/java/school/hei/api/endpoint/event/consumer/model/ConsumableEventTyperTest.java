@@ -48,7 +48,8 @@ class ConsumableEventTyperTest {
 
     assertEquals(1, consumableEvents.size());
     var consumableEvent = consumableEvents.get(0);
-    assertEquals("school.hei.api.endpoint.event.model.UuidCreated", consumableEvent.getEvent().typeName());
+    assertEquals(
+        "school.hei.api.endpoint.event.model.UuidCreated", consumableEvent.getEvent().typeName());
     var payload = (UuidCreated) consumableEvent.getEvent().payload();
     assertEquals("uuid-1", payload.getUuid());
     assertEquals(3, payload.getAttemptNb());
@@ -67,9 +68,7 @@ class ConsumableEventTyperTest {
     var consumableEvent = subject.apply(List.of(message)).get(0);
     consumableEvent.ack();
 
-    verify(sqsClient)
-        .deleteMessage(
-            any(DeleteMessageRequest.class));
+    verify(sqsClient).deleteMessage(any(DeleteMessageRequest.class));
   }
 
   @Test
@@ -85,8 +84,7 @@ class ConsumableEventTyperTest {
     var consumableEvent = subject.apply(List.of(message)).get(0);
     consumableEvent.newRandomVisibilityTimeout();
 
-    verify(sqsClient)
-        .changeMessageVisibility(any(ChangeMessageVisibilityRequest.class));
+    verify(sqsClient).changeMessageVisibility(any(ChangeMessageVisibilityRequest.class));
   }
 
   @Test

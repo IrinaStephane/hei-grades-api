@@ -52,7 +52,8 @@ class CourseServiceTest {
   void create_course_ok() {
     var creation = CourseCreation.builder().code("NEW1").title("New").credits(5).build();
     when(courseRepository.existsByCode("NEW1")).thenReturn(false);
-    when(courseRepository.save(any(Course.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(courseRepository.save(any(Course.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
 
     var created = subject.create(creation);
 
@@ -74,7 +75,8 @@ class CourseServiceTest {
   void update_course_ok() {
     var course = aCourse();
     when(courseRepository.findById("c1")).thenReturn(Optional.of(course));
-    when(courseRepository.save(any(Course.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(courseRepository.save(any(Course.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
 
     var updated =
         subject.update("c1", CourseCreation.builder().code("CODE2").title("T2").credits(6).build());

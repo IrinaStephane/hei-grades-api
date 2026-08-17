@@ -1,6 +1,5 @@
 package school.hei.api.integration;
 
-import static java.time.Instant.now;
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static school.hei.api.integration.conf.ApiAssertions.assertRestException;
@@ -54,7 +53,8 @@ class GroupIT extends FacadeITMockedThirdParties {
     adminToken = tokenFor(jwtService, admin);
 
     refPrefix = "GRP" + randomUUID().toString().substring(0, 8);
-    promotion = promotionRepository.save(Promotion.builder().ref("P-" + refPrefix).entryYear(2025).build());
+    promotion =
+        promotionRepository.save(Promotion.builder().ref("P-" + refPrefix).entryYear(2025).build());
     existingGroup = groupRepository.save(aGroup(refPrefix + "A", Path.EL, promotion));
   }
 
@@ -81,7 +81,12 @@ class GroupIT extends FacadeITMockedThirdParties {
 
   @Test
   void admin_creates_group_with_unknown_promotion_not_found() {
-    var creation = GroupCreation.builder().ref(refPrefix + "X").path(Path.TN).promotionId(NOT_EXISTING_ID).build();
+    var creation =
+        GroupCreation.builder()
+            .ref(refPrefix + "X")
+            .path(Path.TN)
+            .promotionId(NOT_EXISTING_ID)
+            .build();
     var response =
         restTemplate.exchange(
             apiUrl(localPort, "/groups"),
@@ -141,7 +146,12 @@ class GroupIT extends FacadeITMockedThirdParties {
 
   @Test
   void admin_updates_group_ok() {
-    var update = GroupCreation.builder().ref(refPrefix + "B").path(Path.TN).promotionId(promotion.getId()).build();
+    var update =
+        GroupCreation.builder()
+            .ref(refPrefix + "B")
+            .path(Path.TN)
+            .promotionId(promotion.getId())
+            .build();
     var response =
         restTemplate.exchange(
             apiUrl(localPort, "/groups/" + existingGroup.getId()),
@@ -193,7 +203,8 @@ class GroupIT extends FacadeITMockedThirdParties {
     var student = saveUser(Role.STUDENT, "student-" + randomUUID() + "@hei.school");
     recordFlow(adminToken, existingGroup.getId(), student, FlowType.JOIN);
 
-    var secondJoin = recordFlow(adminToken, existingGroup.getId(), student, FlowType.JOIN, RestException.class);
+    var secondJoin =
+        recordFlow(adminToken, existingGroup.getId(), student, FlowType.JOIN, RestException.class);
     assertStatus(HttpStatus.BAD_REQUEST, secondJoin);
     assertRestException(
         HttpStatus.BAD_REQUEST,
@@ -208,7 +219,8 @@ class GroupIT extends FacadeITMockedThirdParties {
   void student_leaves_without_joining_is_bad_request() {
     var student = saveUser(Role.STUDENT, "student-" + randomUUID() + "@hei.school");
 
-    var leave = recordFlow(adminToken, existingGroup.getId(), student, FlowType.LEAVE, RestException.class);
+    var leave =
+        recordFlow(adminToken, existingGroup.getId(), student, FlowType.LEAVE, RestException.class);
     assertStatus(HttpStatus.BAD_REQUEST, leave);
     assertRestException(
         HttpStatus.BAD_REQUEST,
@@ -221,10 +233,13 @@ class GroupIT extends FacadeITMockedThirdParties {
   @Test
   void flow_for_non_student_is_bad_request() {
     var teacher = saveUser(Role.TEACHER, "teacher-" + randomUUID() + "@hei.school");
-    var response = recordFlow(adminToken, existingGroup.getId(), teacher, FlowType.JOIN, RestException.class);
+    var response =
+        recordFlow(adminToken, existingGroup.getId(), teacher, FlowType.JOIN, RestException.class);
     assertStatus(HttpStatus.BAD_REQUEST, response);
     assertRestException(
-        HttpStatus.BAD_REQUEST, "User " + teacher.getId() + " is not a student", response.getBody());
+        HttpStatus.BAD_REQUEST,
+        "User " + teacher.getId() + " is not a student",
+        response.getBody());
     userRepository.delete(teacher);
   }
 
@@ -237,7 +252,12 @@ class GroupIT extends FacadeITMockedThirdParties {
   }
 
   private static Group aGroup(String ref, Path path, Promotion promotion) {
-    return Group.builder().id(randomUUID().toString()).ref(ref).path(path).promotion(promotion).build();
+    return Group.builder()
+        .id(randomUUID().toString())
+        .ref(ref)
+        .path(path)
+        .promotion(promotion)
+        .build();
   }
 
   private ResponseEntity<GroupRest> createGroup(String token, GroupCreation creation) {
@@ -267,12 +287,15 @@ class GroupIT extends FacadeITMockedThirdParties {
         new ParameterizedTypeReference<List<GroupRest>>() {});
   }
 
-  private ResponseEntity<GroupFlowRest> recordFlow(String token, String groupId, User student, FlowType flowType) {
+  private ResponseEntity<GroupFlowRest> recordFlow(
+      String token, String groupId, User student, FlowType flowType) {
     return recordFlow(token, groupId, student, flowType, GroupFlowRest.class);
   }
 
-  private <T> ResponseEntity<T> recordFlow(String token, String groupId, User student, FlowType flowType, Class<T> responseType) {
-    var creation = GroupFlowCreation.builder().studentId(student.getId()).flowType(flowType).build();
+  private <T> ResponseEntity<T> recordFlow(
+      String token, String groupId, User student, FlowType flowType, Class<T> responseType) {
+    var creation =
+        GroupFlowCreation.builder().studentId(student.getId()).flowType(flowType).build();
     return restTemplate.exchange(
         apiUrl(localPort, "/groups/" + groupId + "/flows"),
         HttpMethod.POST,

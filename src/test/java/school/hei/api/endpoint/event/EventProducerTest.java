@@ -1,6 +1,5 @@
 package school.hei.api.endpoint.event;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -39,11 +38,7 @@ class EventProducerTest {
     when(eventBridgeClient.putEvents(any(PutEventsRequest.class)))
         .thenReturn(
             PutEventsResponse.builder()
-                .entries(
-                    List.of(
-                        PutEventsResultEntry.builder()
-                            .eventId("event-id-1")
-                            .build()))
+                .entries(List.of(PutEventsResultEntry.builder().eventId("event-id-1").build()))
                 .build());
 
     subject.accept(List.of(event));
@@ -89,7 +84,8 @@ class EventProducerTest {
   void accept_propagates_json_processing_failure() throws Exception {
     var event = aUuidCreated();
     when(listGrouper.apply(any(), anyInt())).thenReturn(List.of(List.of(event)));
-    when(om.writeValueAsString(any())).thenThrow(new com.fasterxml.jackson.core.JsonProcessingException("boom") {});
+    when(om.writeValueAsString(any()))
+        .thenThrow(new com.fasterxml.jackson.core.JsonProcessingException("boom") {});
 
     assertThrows(RuntimeException.class, () -> subject.accept(List.of(event)));
   }

@@ -73,8 +73,7 @@ class BucketComponentTest {
     var upload = mock(DirectoryUpload.class);
     when(upload.completionFuture())
         .thenReturn(CompletableFuture.completedFuture(completedDirectoryUpload));
-    when(transferManager.uploadDirectory(any(UploadDirectoryRequest.class)))
-        .thenReturn(upload);
+    when(transferManager.uploadDirectory(any(UploadDirectoryRequest.class))).thenReturn(upload);
 
     FileHash hash = subject.upload(dir, "bucket/dir");
 

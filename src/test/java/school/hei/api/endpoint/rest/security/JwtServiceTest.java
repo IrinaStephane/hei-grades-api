@@ -11,7 +11,8 @@ import school.hei.api.model.enums.Role;
 
 class JwtServiceTest {
 
-  private final JwtService subject = new JwtService("test-secret-key-for-hei-grades-api-32chars", 3600);
+  private final JwtService subject =
+      new JwtService("test-secret-key-for-hei-grades-api-32chars", 3600);
 
   private static User aUser() {
     return User.builder()

@@ -90,7 +90,8 @@ class PromotionServiceTest {
     when(promotionRepository.save(any(Promotion.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
-    var updated = subject.update("p1", PromotionCreation.builder().ref("P9").entryYear(2030).build());
+    var updated =
+        subject.update("p1", PromotionCreation.builder().ref("P9").entryYear(2030).build());
 
     assertEquals("P9", updated.getRef());
     assertEquals(2030, updated.getEntryYear());
@@ -153,7 +154,8 @@ class PromotionServiceTest {
             .flowDatetime(now())
             .build();
     when(promotionRepository.findById("p1")).thenReturn(Optional.of(promotion));
-    when(userRepository.findByRole(Role.STUDENT)).thenReturn(List.of(leftStudent, neverJoinedStudent));
+    when(userRepository.findByRole(Role.STUDENT))
+        .thenReturn(List.of(leftStudent, neverJoinedStudent));
     when(groupFlowRepository.findFirstByStudentIdOrderByFlowDatetimeDesc("s1"))
         .thenReturn(Optional.of(leaveFlow));
     when(groupFlowRepository.findFirstByStudentIdOrderByFlowDatetimeDesc("s2"))

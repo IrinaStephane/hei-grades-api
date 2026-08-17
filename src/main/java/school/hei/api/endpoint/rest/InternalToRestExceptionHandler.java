@@ -57,7 +57,11 @@ public class InternalToRestExceptionHandler {
   }
 
   @ExceptionHandler(
-      value = {AccessDeniedException.class, BadCredentialsException.class, ForbiddenException.class})
+      value = {
+        AccessDeniedException.class,
+        BadCredentialsException.class,
+        ForbiddenException.class
+      })
   ResponseEntity<RestException> handleForbidden(Exception e) {
     log.info("Forbidden", e);
     return new ResponseEntity<>(toRest(e, HttpStatus.FORBIDDEN), HttpStatus.FORBIDDEN);
@@ -96,8 +100,7 @@ public class InternalToRestExceptionHandler {
   @ExceptionHandler(value = {NotImplementedException.class})
   ResponseEntity<RestException> handleNotImplemented(NotImplementedException e) {
     log.error("Not implemented", e);
-    return new ResponseEntity<>(
-        toRest(e, HttpStatus.NOT_IMPLEMENTED), HttpStatus.NOT_IMPLEMENTED);
+    return new ResponseEntity<>(toRest(e, HttpStatus.NOT_IMPLEMENTED), HttpStatus.NOT_IMPLEMENTED);
   }
 
   @ExceptionHandler(value = {Exception.class})

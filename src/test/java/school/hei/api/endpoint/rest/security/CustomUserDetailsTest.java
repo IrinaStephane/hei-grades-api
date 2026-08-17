@@ -29,7 +29,10 @@ class CustomUserDetailsTest {
     assertEquals(user, subject.getUser());
     assertEquals("hash", subject.getPassword());
     assertEquals("user@hei.school", subject.getUsername());
-    assertEquals(List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_STUDENT")), subject.getAuthorities());
+    assertEquals(
+        List.of(
+            new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_STUDENT")),
+        subject.getAuthorities());
     assertTrue(subject.isAccountNonExpired());
     assertTrue(subject.isAccountNonLocked());
     assertTrue(subject.isCredentialsNonExpired());

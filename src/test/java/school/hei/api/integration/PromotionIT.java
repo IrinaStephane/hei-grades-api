@@ -85,7 +85,9 @@ class PromotionIT extends FacadeITMockedThirdParties {
             RestException.class);
     assertStatus(HttpStatus.CONFLICT, response);
     assertRestException(
-        HttpStatus.CONFLICT, "Promotion " + creation.getRef() + " already exists", response.getBody());
+        HttpStatus.CONFLICT,
+        "Promotion " + creation.getRef() + " already exists",
+        response.getBody());
   }
 
   @Test
@@ -212,7 +214,12 @@ class PromotionIT extends FacadeITMockedThirdParties {
   }
 
   private static Group aGroup(Promotion promotion) {
-    return Group.builder().id(randomUUID().toString()).ref("G1").path(Path.EL).promotion(promotion).build();
+    return Group.builder()
+        .id(randomUUID().toString())
+        .ref("G1")
+        .path(Path.EL)
+        .promotion(promotion)
+        .build();
   }
 
   private ResponseEntity<PromotionRest> createPromotion(String token, PromotionCreation creation) {

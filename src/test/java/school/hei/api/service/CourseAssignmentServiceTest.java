@@ -91,8 +91,8 @@ class CourseAssignmentServiceTest {
     when(courseRepository.findById("c1")).thenReturn(Optional.of(course));
     when(userRepository.findById("t1")).thenReturn(Optional.of(teacher));
     when(groupRepository.findById("g1")).thenReturn(Optional.of(group));
-    when(courseAssignmentRepository
-            .existsByCourseIdAndTeacherIdAndGroupIdAndYearAndSemester("c1", "t1", "g1", 2025, 1))
+    when(courseAssignmentRepository.existsByCourseIdAndTeacherIdAndGroupIdAndYearAndSemester(
+            "c1", "t1", "g1", 2025, 1))
         .thenReturn(false);
     when(courseAssignmentRepository.save(any(CourseAssignment.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
@@ -108,24 +108,29 @@ class CourseAssignmentServiceTest {
   void create_assignment_with_unknown_course_not_found() {
     when(courseRepository.findById("c1")).thenReturn(Optional.empty());
 
-    assertThrows(NotFoundException.class, () -> subject.create(aCreation("c1", "t1", "g1", 2025, 1)));
+    assertThrows(
+        NotFoundException.class, () -> subject.create(aCreation("c1", "t1", "g1", 2025, 1)));
   }
 
   @Test
   void create_assignment_with_unknown_teacher_not_found() {
-    when(courseRepository.findById("c1")).thenReturn(Optional.of(Course.builder().id("c1").build()));
+    when(courseRepository.findById("c1"))
+        .thenReturn(Optional.of(Course.builder().id("c1").build()));
     when(userRepository.findById("t1")).thenReturn(Optional.empty());
 
-    assertThrows(NotFoundException.class, () -> subject.create(aCreation("c1", "t1", "g1", 2025, 1)));
+    assertThrows(
+        NotFoundException.class, () -> subject.create(aCreation("c1", "t1", "g1", 2025, 1)));
   }
 
   @Test
   void create_assignment_with_non_teacher_user_bad_request() {
     var student = User.builder().id("t1").role(Role.STUDENT).build();
-    when(courseRepository.findById("c1")).thenReturn(Optional.of(Course.builder().id("c1").build()));
+    when(courseRepository.findById("c1"))
+        .thenReturn(Optional.of(Course.builder().id("c1").build()));
     when(userRepository.findById("t1")).thenReturn(Optional.of(student));
 
-    assertThrows(BadRequestException.class, () -> subject.create(aCreation("c1", "t1", "g1", 2025, 1)));
+    assertThrows(
+        BadRequestException.class, () -> subject.create(aCreation("c1", "t1", "g1", 2025, 1)));
   }
 
   @Test
@@ -136,11 +141,12 @@ class CourseAssignmentServiceTest {
     when(courseRepository.findById("c1")).thenReturn(Optional.of(course));
     when(userRepository.findById("t1")).thenReturn(Optional.of(teacher));
     when(groupRepository.findById("g1")).thenReturn(Optional.of(group));
-    when(courseAssignmentRepository
-            .existsByCourseIdAndTeacherIdAndGroupIdAndYearAndSemester("c1", "t1", "g1", 2025, 1))
+    when(courseAssignmentRepository.existsByCourseIdAndTeacherIdAndGroupIdAndYearAndSemester(
+            "c1", "t1", "g1", 2025, 1))
         .thenReturn(true);
 
-    assertThrows(ConflictException.class, () -> subject.create(aCreation("c1", "t1", "g1", 2025, 1)));
+    assertThrows(
+        ConflictException.class, () -> subject.create(aCreation("c1", "t1", "g1", 2025, 1)));
     verify(courseAssignmentRepository, never()).save(any());
   }
 
@@ -154,8 +160,8 @@ class CourseAssignmentServiceTest {
     when(courseRepository.findById("c1")).thenReturn(Optional.of(course));
     when(userRepository.findById("t1")).thenReturn(Optional.of(teacher));
     when(groupRepository.findById("g1")).thenReturn(Optional.of(group));
-    when(courseAssignmentRepository
-            .existsByCourseIdAndTeacherIdAndGroupIdAndYearAndSemester("c1", "t1", "g1", 2026, 1))
+    when(courseAssignmentRepository.existsByCourseIdAndTeacherIdAndGroupIdAndYearAndSemester(
+            "c1", "t1", "g1", 2026, 1))
         .thenReturn(false);
     when(courseAssignmentRepository.save(any(CourseAssignment.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
@@ -181,7 +187,8 @@ class CourseAssignmentServiceTest {
     subject.update("a1", aCreation("c1", "t1", "g1", 2025, 1));
 
     verify(courseAssignmentRepository, never())
-        .existsByCourseIdAndTeacherIdAndGroupIdAndYearAndSemester(any(), any(), any(), any(), any());
+        .existsByCourseIdAndTeacherIdAndGroupIdAndYearAndSemester(
+            any(), any(), any(), any(), any());
   }
 
   @Test

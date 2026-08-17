@@ -82,8 +82,7 @@ class UserServiceTest {
             .build();
     when(userRepository.existsByEmail("new@hei.school")).thenReturn(false);
     when(passwordEncoder.encode("password123")).thenReturn("encoded");
-    when(userRepository.save(any(User.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0));
+    when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
     var created = subject.create(creation);
 
