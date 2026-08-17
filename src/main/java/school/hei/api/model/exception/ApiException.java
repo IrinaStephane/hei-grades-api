@@ -2,13 +2,17 @@ package school.hei.api.model.exception;
 
 import lombok.Getter;
 
-@Getter
 public class ApiException extends RuntimeException {
 
-  private final ApiExceptionType type;
+  @Getter private final ExceptionType type;
 
-  public ApiException(ApiExceptionType type, String message) {
+  public ApiException(ExceptionType type, String message) {
     super(message);
     this.type = type;
+  }
+
+  public enum ExceptionType {
+    CLIENT_EXCEPTION,
+    SERVER_EXCEPTION
   }
 }

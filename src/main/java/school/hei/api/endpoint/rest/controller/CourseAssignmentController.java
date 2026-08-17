@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import school.hei.api.endpoint.rest.mapper.CourseAssignmentMapper;
 import school.hei.api.model.dto.CourseAssignmentCreation;
 import school.hei.api.model.dto.CourseAssignmentRest;
 import school.hei.api.service.CourseAssignmentService;
@@ -25,13 +26,15 @@ import school.hei.api.service.CourseAssignmentService;
 public class CourseAssignmentController {
 
   private final CourseAssignmentService courseAssignmentService;
+  private final CourseAssignmentMapper courseAssignmentMapper;
 
   @GetMapping
   public List<CourseAssignmentRest> getCourseAssignments(
       @RequestParam(required = false) String teacherId,
       @RequestParam(required = false) String groupId,
       @RequestParam(required = false) String courseId) {
-    return courseAssignmentService.getAll(teacherId, groupId, courseId);
+    return courseAssignmentMapper.toRest(
+        courseAssignmentService.getAll(teacherId, groupId, courseId));
   }
 
   @PostMapping
@@ -39,19 +42,19 @@ public class CourseAssignmentController {
   @PreAuthorize("hasRole('ADMIN')")
   public CourseAssignmentRest createCourseAssignment(
       @Valid @RequestBody CourseAssignmentCreation creation) {
-    return courseAssignmentService.create(creation);
+    return courseAssignmentMapper.toRest(courseAssignmentService.create(creation));
   }
 
   @GetMapping("/{id}")
   public CourseAssignmentRest getCourseAssignmentById(@PathVariable String id) {
-    return courseAssignmentService.getById(id);
+    return courseAssignmentMapper.toRest(courseAssignmentService.getById(id));
   }
 
   @PutMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN')")
   public CourseAssignmentRest updateCourseAssignment(
       @PathVariable String id, @Valid @RequestBody CourseAssignmentCreation creation) {
-    return courseAssignmentService.update(id, creation);
+    return courseAssignmentMapper.toRest(courseAssignmentService.update(id, creation));
   }
 
   @DeleteMapping("/{id}")

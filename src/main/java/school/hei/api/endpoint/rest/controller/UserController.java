@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import school.hei.api.endpoint.rest.mapper.GroupFlowMapper;
+import school.hei.api.endpoint.rest.mapper.UserMapper;
 import school.hei.api.model.dto.GroupFlowRest;
 import school.hei.api.model.dto.UserCreation;
 import school.hei.api.model.dto.UserRest;
@@ -29,31 +31,33 @@ import school.hei.api.service.UserService;
 public class UserController {
 
   private final UserService userService;
+  private final UserMapper userMapper;
   private final GroupService groupService;
+  private final GroupFlowMapper groupFlowMapper;
 
   @GetMapping
   @PreAuthorize("hasRole('ADMIN')")
   public List<UserRest> getUsers(@RequestParam(required = false) Role role) {
-    return userService.getAll(role);
+    return userMapper.toRest(userService.getAll(role));
   }
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   @PreAuthorize("hasRole('ADMIN')")
   public UserRest createUser(@Valid @RequestBody UserCreation creation) {
-    return userService.create(creation);
+    return userMapper.toRest(userService.create(creation));
   }
 
   @GetMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN') or #id == authentication.name")
   public UserRest getUserById(@PathVariable String id) {
-    return userService.getById(id);
+    return userMapper.toRest(userService.getById(id));
   }
 
   @PutMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN')")
   public UserRest updateUser(@PathVariable String id, @Valid @RequestBody UserUpdate update) {
-    return userService.update(id, update);
+    return userMapper.toRest(userService.update(id, update));
   }
 
   @DeleteMapping("/{id}")
@@ -66,7 +70,7 @@ public class UserController {
   @GetMapping("/{id}/group_flows")
   @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER') or #id == authentication.name")
   public List<GroupFlowRest> getUserGroupFlows(@PathVariable String id) {
-    return groupService.getGroupFlowHistory(id);
+    return groupFlowMapper.toRest(groupService.getGroupFlowHistory(id));
   }
 
   // POST /{id}/transcript is NOT implemented here: it triggers the async

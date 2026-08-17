@@ -1,5 +1,7 @@
 package school.hei.api.model.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +16,9 @@ import school.hei.api.model.enums.FlowType;
 @AllArgsConstructor
 @Builder
 public class GroupFlowCreation {
-  private String studentId;
-  private FlowType flowType;
+  @NotBlank private String studentId;
+
+  @NotNull private FlowType flowType;
+
   private Instant flowDatetime;
 }

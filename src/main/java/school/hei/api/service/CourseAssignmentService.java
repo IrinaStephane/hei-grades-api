@@ -9,10 +9,10 @@ import school.hei.api.model.CourseAssignment;
 import school.hei.api.model.Group;
 import school.hei.api.model.User;
 import school.hei.api.model.dto.CourseAssignmentCreation;
-import school.hei.api.model.dto.CourseAssignmentRest;
 import school.hei.api.model.enums.Role;
-import school.hei.api.model.exception.ApiException;
-import school.hei.api.model.exception.ApiExceptionType;
+import school.hei.api.model.exception.BadRequestException;
+import school.hei.api.model.exception.ConflictException;
+import school.hei.api.model.exception.NotFoundException;
 import school.hei.api.repository.CourseAssignmentRepository;
 import school.hei.api.repository.CourseRepository;
 import school.hei.api.repository.GroupRepository;
@@ -27,7 +27,7 @@ public class CourseAssignmentService {
   private final UserRepository userRepository;
   private final GroupRepository groupRepository;
 
-  public List<CourseAssignmentRest> getAll(String teacherId, String groupId, String courseId) {
+  public List<CourseAssignment> getAll(String teacherId, String groupId, String courseId) {
     List<CourseAssignment> assignments;
     if (teacherId != null) {
       assignments = courseAssignmentRepository.findByTeacherId(teacherId);
@@ -38,15 +38,15 @@ public class CourseAssignmentService {
     } else {
       assignments = courseAssignmentRepository.findAll();
     }
-    return assignments.stream().map(this::toRest).toList();
+    return assignments;
   }
 
-  public CourseAssignmentRest getById(String id) {
-    return toRest(getEntityById(id));
+  public CourseAssignment getById(String id) {
+    return getEntityById(id);
   }
 
   @Transactional
-  public CourseAssignmentRest create(CourseAssignmentCreation creation) {
+  public CourseAssignment create(CourseAssignmentCreation creation) {
     Course course = getCourseOrThrow(creation.getCourseId());
     User teacher = getTeacherOrThrow(creation.getTeacherId());
     Group group = getGroupOrThrow(creation.getGroupId());
@@ -61,11 +61,11 @@ public class CourseAssignmentService {
             .year(creation.getYear())
             .semester(creation.getSemester())
             .build();
-    return toRest(courseAssignmentRepository.save(assignment));
+    return courseAssignmentRepository.save(assignment);
   }
 
   @Transactional
-  public CourseAssignmentRest update(String id, CourseAssignmentCreation creation) {
+  public CourseAssignment update(String id, CourseAssignmentCreation creation) {
     CourseAssignment assignment = getEntityById(id);
     Course course = getCourseOrThrow(creation.getCourseId());
     User teacher = getTeacherOrThrow(creation.getTeacherId());
@@ -91,13 +91,13 @@ public class CourseAssignmentService {
     assignment.setGroup(group);
     assignment.setYear(creation.getYear());
     assignment.setSemester(creation.getSemester());
-    return toRest(courseAssignmentRepository.save(assignment));
+    return courseAssignmentRepository.save(assignment);
   }
 
   @Transactional
   public void delete(String id) {
     if (!courseAssignmentRepository.existsById(id)) {
-      throw new ApiException(ApiExceptionType.NOT_FOUND, "CourseAssignment " + id + " not found");
+      throw new NotFoundException("CourseAssignment " + id + " not found");
     }
     courseAssignmentRepository.deleteById(id);
   }
@@ -108,8 +108,7 @@ public class CourseAssignmentService {
         courseAssignmentRepository.existsByCourseIdAndTeacherIdAndGroupIdAndYearAndSemester(
             courseId, teacherId, groupId, year, semester);
     if (exists) {
-      throw new ApiException(
-          ApiExceptionType.CONFLICT,
+      throw new ConflictException(
           "This course/teacher/group is already assigned for year "
               + year
               + " semester "
@@ -120,31 +119,22 @@ public class CourseAssignmentService {
   private CourseAssignment getEntityById(String id) {
     return courseAssignmentRepository
         .findById(id)
-        .orElseThrow(
-            () ->
-                new ApiException(
-                    ApiExceptionType.NOT_FOUND, "CourseAssignment " + id + " not found"));
+        .orElseThrow(() -> new NotFoundException("CourseAssignment " + id + " not found"));
   }
 
   private Course getCourseOrThrow(String courseId) {
     return courseRepository
         .findById(courseId)
-        .orElseThrow(
-            () ->
-                new ApiException(ApiExceptionType.NOT_FOUND, "Course " + courseId + " not found"));
+        .orElseThrow(() -> new NotFoundException("Course " + courseId + " not found"));
   }
 
   private User getTeacherOrThrow(String teacherId) {
     User teacher =
         userRepository
             .findById(teacherId)
-            .orElseThrow(
-                () ->
-                    new ApiException(
-                        ApiExceptionType.NOT_FOUND, "User " + teacherId + " not found"));
+            .orElseThrow(() -> new NotFoundException("User " + teacherId + " not found"));
     if (teacher.getRole() != Role.TEACHER) {
-      throw new ApiException(
-          ApiExceptionType.BAD_REQUEST, "User " + teacherId + " is not a teacher");
+      throw new BadRequestException("User " + teacherId + " is not a teacher");
     }
     return teacher;
   }
@@ -152,18 +142,6 @@ public class CourseAssignmentService {
   private Group getGroupOrThrow(String groupId) {
     return groupRepository
         .findById(groupId)
-        .orElseThrow(
-            () -> new ApiException(ApiExceptionType.NOT_FOUND, "Group " + groupId + " not found"));
-  }
-
-  private CourseAssignmentRest toRest(CourseAssignment assignment) {
-    return CourseAssignmentRest.builder()
-        .id(assignment.getId())
-        .courseId(assignment.getCourse().getId())
-        .teacherId(assignment.getTeacher().getId())
-        .groupId(assignment.getGroup().getId())
-        .year(assignment.getYear())
-        .semester(assignment.getSemester())
-        .build();
+        .orElseThrow(() -> new NotFoundException("Group " + groupId + " not found"));
   }
 }

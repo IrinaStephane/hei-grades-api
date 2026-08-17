@@ -6,9 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import school.hei.api.model.Course;
 import school.hei.api.model.dto.CourseCreation;
-import school.hei.api.model.dto.CourseRest;
-import school.hei.api.model.exception.ApiException;
-import school.hei.api.model.exception.ApiExceptionType;
+import school.hei.api.model.exception.ConflictException;
+import school.hei.api.model.exception.NotFoundException;
 import school.hei.api.repository.CourseRepository;
 
 @Service
@@ -17,19 +16,18 @@ public class CourseService {
 
   private final CourseRepository courseRepository;
 
-  public List<CourseRest> getAll() {
-    return courseRepository.findAll().stream().map(this::toRest).toList();
+  public List<Course> getAll() {
+    return courseRepository.findAll();
   }
 
-  public CourseRest getById(String id) {
-    return toRest(getEntityById(id));
+  public Course getById(String id) {
+    return getEntityById(id);
   }
 
   @Transactional
-  public CourseRest create(CourseCreation creation) {
+  public Course create(CourseCreation creation) {
     if (courseRepository.existsByCode(creation.getCode())) {
-      throw new ApiException(
-          ApiExceptionType.CONFLICT, "Course " + creation.getCode() + " already exists");
+      throw new ConflictException("Course " + creation.getCode() + " already exists");
     }
     Course course =
         Course.builder()
@@ -37,22 +35,22 @@ public class CourseService {
             .title(creation.getTitle())
             .credits(creation.getCredits())
             .build();
-    return toRest(courseRepository.save(course));
+    return courseRepository.save(course);
   }
 
   @Transactional
-  public CourseRest update(String id, CourseCreation creation) {
+  public Course update(String id, CourseCreation creation) {
     Course course = getEntityById(id);
     course.setCode(creation.getCode());
     course.setTitle(creation.getTitle());
     course.setCredits(creation.getCredits());
-    return toRest(courseRepository.save(course));
+    return courseRepository.save(course);
   }
 
   @Transactional
   public void delete(String id) {
     if (!courseRepository.existsById(id)) {
-      throw new ApiException(ApiExceptionType.NOT_FOUND, "Course " + id + " not found");
+      throw new NotFoundException("Course " + id + " not found");
     }
     courseRepository.deleteById(id);
   }
@@ -60,16 +58,6 @@ public class CourseService {
   private Course getEntityById(String id) {
     return courseRepository
         .findById(id)
-        .orElseThrow(
-            () -> new ApiException(ApiExceptionType.NOT_FOUND, "Course " + id + " not found"));
-  }
-
-  private CourseRest toRest(Course course) {
-    return CourseRest.builder()
-        .id(course.getId())
-        .code(course.getCode())
-        .title(course.getTitle())
-        .credits(course.getCredits())
-        .build();
+        .orElseThrow(() -> new NotFoundException("Course " + id + " not found"));
   }
 }

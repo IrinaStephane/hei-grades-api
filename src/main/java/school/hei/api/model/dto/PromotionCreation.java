@@ -1,5 +1,7 @@
 package school.hei.api.model.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,6 +14,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class PromotionCreation {
-  private String ref;
-  private Integer entryYear;
+  @NotBlank private String ref;
+
+  @NotNull private Integer entryYear;
 }

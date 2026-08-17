@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import school.hei.api.endpoint.rest.mapper.GroupFlowMapper;
+import school.hei.api.endpoint.rest.mapper.GroupMapper;
 import school.hei.api.model.dto.GroupCreation;
 import school.hei.api.model.dto.GroupFlowCreation;
 import school.hei.api.model.dto.GroupFlowRest;
@@ -28,29 +30,31 @@ import school.hei.api.service.GroupService;
 public class GroupController {
 
   private final GroupService groupService;
+  private final GroupMapper groupMapper;
+  private final GroupFlowMapper groupFlowMapper;
 
   @GetMapping
   public List<GroupRest> getGroups(
       @RequestParam(required = false) String promotionId, @RequestParam(required = false) Path path) {
-    return groupService.getAll(promotionId, path);
+    return groupMapper.toRest(groupService.getAll(promotionId, path));
   }
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   @PreAuthorize("hasRole('ADMIN')")
   public GroupRest createGroup(@Valid @RequestBody GroupCreation creation) {
-    return groupService.create(creation);
+    return groupMapper.toRest(groupService.create(creation));
   }
 
   @GetMapping("/{id}")
   public GroupRest getGroupById(@PathVariable String id) {
-    return groupService.getById(id);
+    return groupMapper.toRest(groupService.getById(id));
   }
 
   @PutMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN')")
   public GroupRest updateGroup(@PathVariable String id, @Valid @RequestBody GroupCreation creation) {
-    return groupService.update(id, creation);
+    return groupMapper.toRest(groupService.update(id, creation));
   }
 
   @DeleteMapping("/{id}")
@@ -65,6 +69,6 @@ public class GroupController {
   @PreAuthorize("hasRole('ADMIN')")
   public GroupFlowRest createGroupFlow(
       @PathVariable String id, @Valid @RequestBody GroupFlowCreation creation) {
-    return groupService.recordFlow(id, creation);
+    return groupFlowMapper.toRest(groupService.recordFlow(id, creation));
   }
 }

@@ -1,6 +1,8 @@
 package school.hei.api.service;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -14,13 +16,11 @@ import school.hei.api.model.Promotion;
 import school.hei.api.model.User;
 import school.hei.api.model.dto.GroupCreation;
 import school.hei.api.model.dto.GroupFlowCreation;
-import school.hei.api.model.dto.GroupFlowRest;
-import school.hei.api.model.dto.GroupRest;
 import school.hei.api.model.enums.FlowType;
 import school.hei.api.model.enums.Path;
 import school.hei.api.model.enums.Role;
-import school.hei.api.model.exception.ApiException;
-import school.hei.api.model.exception.ApiExceptionType;
+import school.hei.api.model.exception.BadRequestException;
+import school.hei.api.model.exception.NotFoundException;
 import school.hei.api.repository.CourseAssignmentRepository;
 import school.hei.api.repository.GroupFlowRepository;
 import school.hei.api.repository.GroupRepository;
@@ -37,7 +37,7 @@ public class GroupService {
   private final UserRepository userRepository;
   private final CourseAssignmentRepository courseAssignmentRepository;
 
-  public List<GroupRest> getAll(String promotionId, Path path) {
+  public List<Group> getAll(String promotionId, Path path) {
     List<Group> groups;
     if (promotionId != null && path != null) {
       groups = groupRepository.findByPromotionIdAndPath(promotionId, path);
@@ -48,45 +48,41 @@ public class GroupService {
     } else {
       groups = groupRepository.findAll();
     }
-    return groups.stream().map(this::toRest).toList();
+    return groups;
   }
 
-  public GroupRest getById(String id) {
-    return toRest(getEntityById(id));
+  public Group getById(String id) {
+    return getEntityById(id);
   }
 
   @Transactional
-  public GroupRest create(GroupCreation creation) {
+  public Group create(GroupCreation creation) {
     Promotion promotion = getPromotionOrThrow(creation.getPromotionId());
     Group group =
-        Group.builder()
-            .ref(creation.getRef())
-            .path(creation.getPath())
-            .promotion(promotion)
-            .build();
-    return toRest(groupRepository.save(group));
+        Group.builder().ref(creation.getRef()).path(creation.getPath()).promotion(promotion).build();
+    return groupRepository.save(group);
   }
 
   @Transactional
-  public GroupRest update(String id, GroupCreation creation) {
+  public Group update(String id, GroupCreation creation) {
     Group group = getEntityById(id);
     Promotion promotion = getPromotionOrThrow(creation.getPromotionId());
     group.setRef(creation.getRef());
     group.setPath(creation.getPath());
     group.setPromotion(promotion);
-    return toRest(groupRepository.save(group));
+    return groupRepository.save(group);
   }
 
   @Transactional
   public void delete(String id) {
     if (!groupRepository.existsById(id)) {
-      throw new ApiException(ApiExceptionType.NOT_FOUND, "Group " + id + " not found");
+      throw new NotFoundException("Group " + id + " not found");
     }
     groupRepository.deleteById(id);
   }
 
   @Transactional
-  public GroupFlowRest recordFlow(String groupId, GroupFlowCreation creation) {
+  public GroupFlow recordFlow(String groupId, GroupFlowCreation creation) {
     Group group = getEntityById(groupId);
     User student = getStudentOrThrow(creation.getStudentId());
 
@@ -95,13 +91,11 @@ public class GroupService {
     boolean currentlyActive = lastFlow.isPresent() && lastFlow.get().getFlowType() == FlowType.JOIN;
 
     if (creation.getFlowType() == FlowType.JOIN && currentlyActive) {
-      throw new ApiException(
-          ApiExceptionType.BAD_REQUEST,
+      throw new BadRequestException(
           "Student " + student.getId() + " is already active in a group; LEAVE it first");
     }
     if (creation.getFlowType() == FlowType.LEAVE && !currentlyActive) {
-      throw new ApiException(
-          ApiExceptionType.BAD_REQUEST,
+      throw new BadRequestException(
           "Student " + student.getId() + " is not currently active in any group");
     }
 
@@ -113,27 +107,26 @@ public class GroupService {
             .flowDatetime(
                 creation.getFlowDatetime() != null ? creation.getFlowDatetime() : Instant.now())
             .build();
-    return toRest(groupFlowRepository.save(flow));
+    return groupFlowRepository.save(flow);
   }
 
-  public List<GroupFlowRest> getGroupFlowHistory(String studentId) {
+  public List<GroupFlow> getGroupFlowHistory(String studentId) {
     getStudentOrThrow(studentId);
-    return groupFlowRepository.findByStudentIdOrderByFlowDatetimeAsc(studentId).stream()
-        .map(this::toRest)
-        .toList();
+    return groupFlowRepository.findByStudentIdOrderByFlowDatetimeAsc(studentId);
   }
 
-  public Optional<GroupRest> getCurrentGroup(String studentId) {
+  public Optional<Group> getCurrentGroup(String studentId) {
     getStudentOrThrow(studentId);
     return groupFlowRepository
         .findFirstByStudentIdOrderByFlowDatetimeDesc(studentId)
         .filter(flow -> flow.getFlowType() == FlowType.JOIN)
-        .map(flow -> toRest(flow.getGroup()));
+        .map(GroupFlow::getGroup);
   }
 
   public List<CourseAssignment> getCourseAssignmentsFollowedByStudent(String studentId) {
     getStudentOrThrow(studentId);
-    List<GroupFlow> history = groupFlowRepository.findByStudentIdOrderByFlowDatetimeAsc(studentId);
+    List<GroupFlow> history =
+        groupFlowRepository.findByStudentIdOrderByFlowDatetimeAsc(studentId);
 
     List<CourseAssignment> result = new ArrayList<>();
     Group activeGroup = null;
@@ -144,7 +137,8 @@ public class GroupService {
         activeGroup = event.getGroup();
         activeSince = event.getFlowDatetime();
       } else if (event.getFlowType() == FlowType.LEAVE && activeGroup != null) {
-        result.addAll(courseAssignmentsInPeriod(activeGroup, activeSince, event.getFlowDatetime()));
+        result.addAll(
+            courseAssignmentsInPeriod(activeGroup, activeSince, event.getFlowDatetime()));
         activeGroup = null;
         activeSince = null;
       }
@@ -155,61 +149,49 @@ public class GroupService {
     return result;
   }
 
-  private List<CourseAssignment> courseAssignmentsInPeriod(Group group, Instant from, Instant to) {
-    int fromYear = from.atZone(java.time.ZoneOffset.UTC).getYear();
-    int toYear = to.atZone(java.time.ZoneOffset.UTC).getYear();
+  private List<CourseAssignment> courseAssignmentsInPeriod(
+      Group group, Instant from, Instant to) {
     return courseAssignmentRepository.findByGroupId(group.getId()).stream()
-        .filter(assignment -> assignment.getYear() >= fromYear && assignment.getYear() <= toYear)
+        .filter(assignment -> overlapsMembershipPeriod(assignment, from, to))
         .toList();
+  }
+
+  private boolean overlapsMembershipPeriod(CourseAssignment assignment, Instant from, Instant to) {
+    LocalDate periodStart = semesterStart(assignment.getYear(), assignment.getSemester());
+    LocalDate periodEnd = semesterEnd(assignment.getYear(), assignment.getSemester());
+    LocalDate membershipFrom = from.atZone(ZoneOffset.UTC).toLocalDate();
+    LocalDate membershipTo = to.atZone(ZoneOffset.UTC).toLocalDate();
+    return !periodStart.isAfter(membershipTo) && !periodEnd.isBefore(membershipFrom);
+  }
+
+  private LocalDate semesterStart(int year, int semester) {
+    return semester == 1 ? LocalDate.of(year, 1, 1) : LocalDate.of(year, 7, 1);
+  }
+
+  private LocalDate semesterEnd(int year, int semester) {
+    return semester == 1 ? LocalDate.of(year, 6, 30) : LocalDate.of(year, 12, 31);
   }
 
   private Group getEntityById(String id) {
     return groupRepository
         .findById(id)
-        .orElseThrow(
-            () -> new ApiException(ApiExceptionType.NOT_FOUND, "Group " + id + " not found"));
+        .orElseThrow(() -> new NotFoundException("Group " + id + " not found"));
   }
 
   private Promotion getPromotionOrThrow(String promotionId) {
     return promotionRepository
         .findById(promotionId)
-        .orElseThrow(
-            () ->
-                new ApiException(
-                    ApiExceptionType.NOT_FOUND, "Promotion " + promotionId + " not found"));
+        .orElseThrow(() -> new NotFoundException("Promotion " + promotionId + " not found"));
   }
 
   private User getStudentOrThrow(String studentId) {
     User user =
         userRepository
             .findById(studentId)
-            .orElseThrow(
-                () ->
-                    new ApiException(
-                        ApiExceptionType.NOT_FOUND, "User " + studentId + " not found"));
+            .orElseThrow(() -> new NotFoundException("User " + studentId + " not found"));
     if (user.getRole() != Role.STUDENT) {
-      throw new ApiException(
-          ApiExceptionType.BAD_REQUEST, "User " + studentId + " is not a student");
+      throw new BadRequestException("User " + studentId + " is not a student");
     }
     return user;
-  }
-
-  private GroupRest toRest(Group group) {
-    return GroupRest.builder()
-        .id(group.getId())
-        .ref(group.getRef())
-        .path(group.getPath())
-        .promotionId(group.getPromotion().getId())
-        .build();
-  }
-
-  private GroupFlowRest toRest(GroupFlow flow) {
-    return GroupFlowRest.builder()
-        .id(flow.getId())
-        .groupId(flow.getGroup().getId())
-        .studentId(flow.getStudent().getId())
-        .flowType(flow.getFlowType())
-        .flowDatetime(flow.getFlowDatetime())
-        .build();
   }
 }

@@ -1,4 +1,4 @@
-package school.hei.api.config.security;
+package school.hei.api.endpoint.rest.security;
 
 import java.util.Collection;
 import java.util.List;

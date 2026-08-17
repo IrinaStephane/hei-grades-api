@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import school.hei.api.endpoint.rest.mapper.PromotionMapper;
 import school.hei.api.model.dto.PromotionCreation;
 import school.hei.api.model.dto.PromotionRest;
 import school.hei.api.model.dto.StudentSummaryRest;
@@ -25,29 +26,30 @@ import school.hei.api.service.PromotionService;
 public class PromotionController {
 
   private final PromotionService promotionService;
+  private final PromotionMapper promotionMapper;
 
   @GetMapping
   public List<PromotionRest> getPromotions() {
-    return promotionService.getAll();
+    return promotionMapper.toRest(promotionService.getAll());
   }
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   @PreAuthorize("hasRole('ADMIN')")
   public PromotionRest createPromotion(@Valid @RequestBody PromotionCreation creation) {
-    return promotionService.create(creation);
+    return promotionMapper.toRest(promotionService.create(creation));
   }
 
   @GetMapping("/{id}")
   public PromotionRest getPromotionById(@PathVariable String id) {
-    return promotionService.getById(id);
+    return promotionMapper.toRest(promotionService.getById(id));
   }
 
   @PutMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN')")
   public PromotionRest updatePromotion(
       @PathVariable String id, @Valid @RequestBody PromotionCreation creation) {
-    return promotionService.update(id, creation);
+    return promotionMapper.toRest(promotionService.update(id, creation));
   }
 
   @DeleteMapping("/{id}")

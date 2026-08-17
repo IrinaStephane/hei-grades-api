@@ -1,4 +1,4 @@
-package school.hei.api.config.security;
+package school.hei.api.endpoint.rest.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;

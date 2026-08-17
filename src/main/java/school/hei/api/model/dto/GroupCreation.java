@@ -1,5 +1,7 @@
 package school.hei.api.model.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,7 +15,9 @@ import school.hei.api.model.enums.Path;
 @AllArgsConstructor
 @Builder
 public class GroupCreation {
-  private String ref;
-  private Path path;
-  private String promotionId;
+  @NotBlank private String ref;
+
+  @NotNull private Path path;
+
+  @NotBlank private String promotionId;
 }

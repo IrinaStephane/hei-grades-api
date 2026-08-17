@@ -9,12 +9,11 @@ import school.hei.api.model.Promotion;
 import school.hei.api.model.User;
 import school.hei.api.model.dto.GroupRest;
 import school.hei.api.model.dto.PromotionCreation;
-import school.hei.api.model.dto.PromotionRest;
 import school.hei.api.model.dto.StudentSummaryRest;
 import school.hei.api.model.enums.FlowType;
 import school.hei.api.model.enums.Role;
-import school.hei.api.model.exception.ApiException;
-import school.hei.api.model.exception.ApiExceptionType;
+import school.hei.api.model.exception.ConflictException;
+import school.hei.api.model.exception.NotFoundException;
 import school.hei.api.repository.GroupFlowRepository;
 import school.hei.api.repository.PromotionRepository;
 import school.hei.api.repository.UserRepository;
@@ -27,37 +26,36 @@ public class PromotionService {
   private final UserRepository userRepository;
   private final GroupFlowRepository groupFlowRepository;
 
-  public List<PromotionRest> getAll() {
-    return promotionRepository.findAll().stream().map(this::toRest).toList();
+  public List<Promotion> getAll() {
+    return promotionRepository.findAll();
   }
 
-  public PromotionRest getById(String id) {
-    return toRest(getEntityById(id));
+  public Promotion getById(String id) {
+    return getEntityById(id);
   }
 
   @Transactional
-  public PromotionRest create(PromotionCreation creation) {
+  public Promotion create(PromotionCreation creation) {
     if (promotionRepository.existsByRef(creation.getRef())) {
-      throw new ApiException(
-          ApiExceptionType.CONFLICT, "Promotion " + creation.getRef() + " already exists");
+      throw new ConflictException("Promotion " + creation.getRef() + " already exists");
     }
     Promotion promotion =
         Promotion.builder().ref(creation.getRef()).entryYear(creation.getEntryYear()).build();
-    return toRest(promotionRepository.save(promotion));
+    return promotionRepository.save(promotion);
   }
 
   @Transactional
-  public PromotionRest update(String id, PromotionCreation creation) {
+  public Promotion update(String id, PromotionCreation creation) {
     Promotion promotion = getEntityById(id);
     promotion.setRef(creation.getRef());
     promotion.setEntryYear(creation.getEntryYear());
-    return toRest(promotionRepository.save(promotion));
+    return promotionRepository.save(promotion);
   }
 
   @Transactional
   public void delete(String id) {
     if (!promotionRepository.existsById(id)) {
-      throw new ApiException(ApiExceptionType.NOT_FOUND, "Promotion " + id + " not found");
+      throw new NotFoundException("Promotion " + id + " not found");
     }
     promotionRepository.deleteById(id);
   }
@@ -101,15 +99,6 @@ public class PromotionService {
   private Promotion getEntityById(String id) {
     return promotionRepository
         .findById(id)
-        .orElseThrow(
-            () -> new ApiException(ApiExceptionType.NOT_FOUND, "Promotion " + id + " not found"));
-  }
-
-  private PromotionRest toRest(Promotion promotion) {
-    return PromotionRest.builder()
-        .id(promotion.getId())
-        .ref(promotion.getRef())
-        .entryYear(promotion.getEntryYear())
-        .build();
+        .orElseThrow(() -> new NotFoundException("Promotion " + id + " not found"));
   }
 }

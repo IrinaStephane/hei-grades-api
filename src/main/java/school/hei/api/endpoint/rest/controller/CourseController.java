@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import school.hei.api.endpoint.rest.mapper.CourseMapper;
 import school.hei.api.model.dto.CourseCreation;
 import school.hei.api.model.dto.CourseRest;
 import school.hei.api.service.CourseService;
@@ -24,29 +25,30 @@ import school.hei.api.service.CourseService;
 public class CourseController {
 
   private final CourseService courseService;
+  private final CourseMapper courseMapper;
 
   @GetMapping
   public List<CourseRest> getCourses() {
-    return courseService.getAll();
+    return courseMapper.toRest(courseService.getAll());
   }
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   @PreAuthorize("hasRole('ADMIN')")
   public CourseRest createCourse(@Valid @RequestBody CourseCreation creation) {
-    return courseService.create(creation);
+    return courseMapper.toRest(courseService.create(creation));
   }
 
   @GetMapping("/{id}")
   public CourseRest getCourseById(@PathVariable String id) {
-    return courseService.getById(id);
+    return courseMapper.toRest(courseService.getById(id));
   }
 
   @PutMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN')")
   public CourseRest updateCourse(
       @PathVariable String id, @Valid @RequestBody CourseCreation creation) {
-    return courseService.update(id, creation);
+    return courseMapper.toRest(courseService.update(id, creation));
   }
 
   @DeleteMapping("/{id}")
