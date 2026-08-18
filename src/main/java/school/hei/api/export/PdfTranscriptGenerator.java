@@ -4,7 +4,7 @@ import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import java.io.File;
 import java.io.FileOutputStream;
 import org.springframework.stereotype.Component;
-import school.hei.api.repository.model.User;
+import school.hei.api.model.User;
 
 @Component
 public class PdfTranscriptGenerator {

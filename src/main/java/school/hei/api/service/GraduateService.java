@@ -62,7 +62,7 @@ public class GraduateService {
         assignments.stream()
             .map(
                 assignment -> {
-                  var course = courseRepository.findById(assignment.getCourseId()).orElseThrow();
+                  var course = assignment.getCourse();
                   var exams = examRepository.findByCourseAssignmentId(assignment.getId());
                   double finalGrade =
                       exams.stream()
@@ -106,7 +106,7 @@ public class GraduateService {
         "Depends on Group/GroupFlow entities - to implement once available on dev");
   }
 
-  private List<school.hei.api.repository.model.CourseAssignment> courseAssignmentsForGroups(
+  private List<school.hei.api.model.CourseAssignment> courseAssignmentsForGroups(
       List<String> groupIds, String path) {
     throw new UnsupportedOperationException(
         "Depends on CourseAssignment/Group entities - to implement once available on dev");
