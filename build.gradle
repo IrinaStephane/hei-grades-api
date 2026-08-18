@@ -71,8 +71,6 @@ jacocoTestReport {
         html.required = true
     }
     afterEvaluate {
-        // Need to be duplicated like this from jacocoTestCoverageVerification,
-        // else display coverageRate is inconsistent with what was computed during coverage...
         classDirectories.setFrom(files(classDirectories.files.collect {
             fileTree(dir: it, exclude: [
                     "**/gen/**"
@@ -116,6 +114,7 @@ dependencies {
     testImplementation 'org.testcontainers:testcontainers-postgresql:2.0.2'
     implementation 'org.postgresql:postgresql:42.6.0'
     implementation 'org.hibernate.orm:hibernate-community-dialects:6.4.3.Final'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.3'
 

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Diplômés HEI</title>
+</head>
+<body>
+<h1>Promotions</h1>
+
+<table border="1" cellpadding="8">
+    <thead>
+    <tr>
+        <th>Référence</th>
+        <th>Année d'entrée</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="promotion : ${promotions}">
+        <td th:text="${promotion.ref}">2023</td>
+        <td th:text="${promotion.entryYear}">2023</td>
+        <td>
+            <a th:href="@{/api/promotions/{id}/graduates/export(id=${promotion.id})}">
+                Télécharger la liste des diplômés
+            </a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>
