@@ -12,6 +12,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class RestException {
-    private String type;
-    private String message;
+  private String type;
+  private String message;
 }
