@@ -154,22 +154,19 @@ public class GraduateService {
   }
 
   private List<CourseAssignment> courseAssignmentsForGroups(List<String> groupIds, String path) {
-    List<CourseAssignment> assignments = new ArrayList<>();
-    for (String groupId : groupIds) {
-      assignments.addAll(courseAssignmentRepository.findByGroupId(groupId));
-    }
-
-    Map<String, CourseAssignment> uniqueMap = new HashMap<>();
-    for (CourseAssignment assignment : assignments) {
-      uniqueMap.putIfAbsent(assignment.getId(), assignment);
-    }
-    assignments = new ArrayList<>(uniqueMap.values());
+    List<CourseAssignment> uniqueAssignments =
+        groupIds.stream()
+            .flatMap(gid -> courseAssignmentRepository.findByGroupId(gid).stream())
+            .collect(
+                java.util.stream.Collectors.toMap(CourseAssignment::getId, a -> a, (a, b) -> a))
+            .values()
+            .stream()
+            .toList();
 
     if (path != null) {
       Path pathEnum = Path.valueOf(path);
-      assignments = assignments.stream().filter(a -> a.getGroup().getPath() == pathEnum).toList();
+      return uniqueAssignments.stream().filter(a -> a.getGroup().getPath() == pathEnum).toList();
     }
-
-    return assignments;
+    return uniqueAssignments;
   }
 }

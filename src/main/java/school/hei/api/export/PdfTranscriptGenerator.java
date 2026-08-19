@@ -5,9 +5,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.HtmlUtils;
@@ -52,23 +50,22 @@ public class PdfTranscriptGenerator {
     var flows = groupFlowRepository.findByStudentIdOrderByFlowDatetimeAsc(student.getId());
     List<String> groupIds = flows.stream().map(f -> f.getGroup().getId()).distinct().toList();
 
-    List<CourseAssignment> assignments = new ArrayList<>();
-    for (String groupId : groupIds) {
-      assignments.addAll(courseAssignmentRepository.findByGroupId(groupId));
-    }
+    List<CourseAssignment> uniqueAssignments =
+        groupIds.stream()
+            .flatMap(gid -> courseAssignmentRepository.findByGroupId(gid).stream())
+            .collect(
+                java.util.stream.Collectors.toMap(CourseAssignment::getId, a -> a, (a, b) -> a))
+            .values()
+            .stream()
+            .toList();
 
-    Map<String, CourseAssignment> uniqueMap = new HashMap<>();
-    for (CourseAssignment a : assignments) {
-      uniqueMap.putIfAbsent(a.getId(), a);
-    }
-    assignments = new ArrayList<>(uniqueMap.values());
-
-    if (year != null) {
-      assignments = assignments.stream().filter(a -> a.getYear().equals(year)).toList();
-    }
+    List<CourseAssignment> filteredAssignments =
+        year != null
+            ? uniqueAssignments.stream().filter(a -> a.getYear().equals(year)).toList()
+            : uniqueAssignments;
 
     List<CourseTranscript> result = new ArrayList<>();
-    for (CourseAssignment assignment : assignments) {
+    for (CourseAssignment assignment : filteredAssignments) {
       var course = assignment.getCourse();
       var exams = examRepository.findByCourseAssignmentId(assignment.getId());
       double finalGrade =
