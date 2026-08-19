@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,39 +35,33 @@ public class UserController {
   private final GroupFlowMapper groupFlowMapper;
 
   @GetMapping
-  @PreAuthorize("hasRole('ADMIN')")
   public List<UserRest> getUsers(@RequestParam(required = false) Role role) {
     return userMapper.toRest(userService.getAll(role));
   }
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
-  @PreAuthorize("hasRole('ADMIN')")
   public UserRest createUser(@Valid @RequestBody UserCreation creation) {
     return userMapper.toRest(userService.create(creation));
   }
 
   @GetMapping("/{id}")
-  @PreAuthorize("hasRole('ADMIN') or #id == authentication.name")
   public UserRest getUserById(@PathVariable String id) {
     return userMapper.toRest(userService.getById(id));
   }
 
   @PutMapping("/{id}")
-  @PreAuthorize("hasRole('ADMIN')")
   public UserRest updateUser(@PathVariable String id, @Valid @RequestBody UserUpdate update) {
     return userMapper.toRest(userService.update(id, update));
   }
 
   @DeleteMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  @PreAuthorize("hasRole('ADMIN')")
   public void deleteUser(@PathVariable String id) {
     userService.delete(id);
   }
 
   @GetMapping("/{id}/group_flows")
-  @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER') or #id == authentication.name")
   public List<GroupFlowRest> getUserGroupFlows(@PathVariable String id) {
     return groupFlowMapper.toRest(groupService.getGroupFlowHistory(id));
   }

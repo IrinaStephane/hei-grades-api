@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,7 +41,6 @@ public class GroupController {
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
-  @PreAuthorize("hasRole('ADMIN')")
   public GroupRest createGroup(@Valid @RequestBody GroupCreation creation) {
     return groupMapper.toRest(groupService.create(creation));
   }
@@ -53,7 +51,6 @@ public class GroupController {
   }
 
   @PutMapping("/{id}")
-  @PreAuthorize("hasRole('ADMIN')")
   public GroupRest updateGroup(
       @PathVariable String id, @Valid @RequestBody GroupCreation creation) {
     return groupMapper.toRest(groupService.update(id, creation));
@@ -61,14 +58,12 @@ public class GroupController {
 
   @DeleteMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  @PreAuthorize("hasRole('ADMIN')")
   public void deleteGroup(@PathVariable String id) {
     groupService.delete(id);
   }
 
   @PostMapping("/{id}/flows")
   @ResponseStatus(HttpStatus.CREATED)
-  @PreAuthorize("hasRole('ADMIN')")
   public GroupFlowRest createGroupFlow(
       @PathVariable String id, @Valid @RequestBody GroupFlowCreation creation) {
     return groupFlowMapper.toRest(groupService.recordFlow(id, creation));

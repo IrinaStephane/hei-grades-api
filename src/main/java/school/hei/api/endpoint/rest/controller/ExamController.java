@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import school.hei.api.endpoint.rest.model.ExamCreationRequest;
+import school.hei.api.endpoint.rest.security.model.Principal;
+import school.hei.api.model.enums.Role;
 import school.hei.api.repository.model.Exam;
 import school.hei.api.service.ExamService;
 
@@ -35,14 +38,29 @@ public class ExamController {
 
   @PostMapping("/api/exams")
   @ResponseStatus(HttpStatus.CREATED)
-  public Exam createExam(@Valid @RequestBody ExamCreationRequest body) {
+  public Exam createExam(
+      @AuthenticationPrincipal Principal principal, @Valid @RequestBody ExamCreationRequest body) {
     return examService.create(
-        body.courseAssignmentId(), body.title(), body.examinationDate(), body.coefficient());
+        body.courseAssignmentId(),
+        body.title(),
+        body.examinationDate(),
+        body.coefficient(),
+        principal.getUserId(),
+        Role.valueOf(principal.getRole()));
   }
 
   @PutMapping("/api/exams/{id}")
-  public Exam updateExam(@PathVariable String id, @Valid @RequestBody ExamCreationRequest body) {
-    return examService.update(id, body.title(), body.examinationDate(), body.coefficient());
+  public Exam updateExam(
+      @AuthenticationPrincipal Principal principal,
+      @PathVariable String id,
+      @Valid @RequestBody ExamCreationRequest body) {
+    return examService.update(
+        id,
+        body.title(),
+        body.examinationDate(),
+        body.coefficient(),
+        principal.getUserId(),
+        Role.valueOf(principal.getRole()));
   }
 
   @DeleteMapping("/api/exams/{id}")

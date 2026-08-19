@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,7 +38,6 @@ public class CourseAssignmentController {
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
-  @PreAuthorize("hasRole('ADMIN')")
   public CourseAssignmentRest createCourseAssignment(
       @Valid @RequestBody CourseAssignmentCreation creation) {
     return courseAssignmentMapper.toRest(courseAssignmentService.create(creation));
@@ -51,7 +49,6 @@ public class CourseAssignmentController {
   }
 
   @PutMapping("/{id}")
-  @PreAuthorize("hasRole('ADMIN')")
   public CourseAssignmentRest updateCourseAssignment(
       @PathVariable String id, @Valid @RequestBody CourseAssignmentCreation creation) {
     return courseAssignmentMapper.toRest(courseAssignmentService.update(id, creation));
@@ -59,7 +56,6 @@ public class CourseAssignmentController {
 
   @DeleteMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  @PreAuthorize("hasRole('ADMIN')")
   public void deleteCourseAssignment(@PathVariable String id) {
     courseAssignmentService.delete(id);
   }

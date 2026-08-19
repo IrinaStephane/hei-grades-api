@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,7 +34,6 @@ public class PromotionController {
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
-  @PreAuthorize("hasRole('ADMIN')")
   public PromotionRest createPromotion(@Valid @RequestBody PromotionCreation creation) {
     return promotionMapper.toRest(promotionService.create(creation));
   }
@@ -46,7 +44,6 @@ public class PromotionController {
   }
 
   @PutMapping("/{id}")
-  @PreAuthorize("hasRole('ADMIN')")
   public PromotionRest updatePromotion(
       @PathVariable String id, @Valid @RequestBody PromotionCreation creation) {
     return promotionMapper.toRest(promotionService.update(id, creation));
@@ -54,13 +51,11 @@ public class PromotionController {
 
   @DeleteMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  @PreAuthorize("hasRole('ADMIN')")
   public void deletePromotion(@PathVariable String id) {
     promotionService.delete(id);
   }
 
   @GetMapping("/{id}/students")
-  @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
   public List<StudentSummaryRest> getPromotionStudents(@PathVariable String id) {
     return promotionService.getStudents(id);
   }
