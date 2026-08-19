@@ -12,7 +12,7 @@
     <tr>
         <th>Référence</th>
         <th>Année d'entrée</th>
-        <th></th>
+        <th>Actions</th>
     </tr>
     </thead>
     <tbody>
@@ -20,8 +20,12 @@
         <td th:text="${promotion.ref}">2023</td>
         <td th:text="${promotion.entryYear}">2023</td>
         <td>
-            <a th:href="@{/api/promotions/{id}/graduates/export(id=${promotion.id})}">
-                Télécharger la liste des diplômés
+            <a th:href="@{/api/promotions/{id}/graduates/export(id=${promotion.id}, path='EL')}">
+                Diplômés EL
+            </a>
+            &nbsp;
+            <a th:href="@{/api/promotions/{id}/graduates/export(id=${promotion.id}, path='TN')}">
+                Diplômés TN
             </a>
         </td>
     </tr>
