@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import school.hei.api.model.CourseAssignment;
 import school.hei.api.model.enums.Role;
+import school.hei.api.model.exception.BadRequestException;
 import school.hei.api.model.exception.ForbiddenException;
 import school.hei.api.model.exception.NotFoundException;
 import school.hei.api.repository.CourseAssignmentRepository;
@@ -47,6 +48,7 @@ public class ExamService {
                     new NotFoundException(
                         "CourseAssignment with id " + courseAssignmentId + " not found"));
     assertCanManage(assignment, authenticatedUserId, authenticatedRole);
+    assertCoefficientSumWithinLimit(courseAssignmentId, coefficient, null);
 
     var exam =
         Exam.builder()
@@ -75,6 +77,7 @@ public class ExamService {
                     new NotFoundException(
                         "CourseAssignment with id " + exam.getCourseAssignmentId() + " not found"));
     assertCanManage(assignment, authenticatedUserId, authenticatedRole);
+    assertCoefficientSumWithinLimit(exam.getCourseAssignmentId(), coefficient, exam.getId());
 
     exam.setTitle(title);
     exam.setExaminationDate(examinationDate);
@@ -94,6 +97,24 @@ public class ExamService {
     if (authenticatedRole == Role.TEACHER
         && !assignment.getTeacher().getId().equals(authenticatedUserId)) {
       throw new ForbiddenException("A teacher can only manage exams of their own courses");
+    }
+  }
+
+  private void assertCoefficientSumWithinLimit(
+      String courseAssignmentId, Double newCoefficient, String excludeExamId) {
+    var existingExams = examRepository.findByCourseAssignmentId(courseAssignmentId);
+    double sum =
+        existingExams.stream()
+            .filter(e -> excludeExamId == null || !e.getId().equals(excludeExamId))
+            .mapToDouble(Exam::getCoefficient)
+            .sum();
+    if (sum + newCoefficient > 1.0) {
+      throw new BadRequestException(
+          "Sum of coefficients would exceed 1.0 (current: "
+              + sum
+              + ", new: "
+              + newCoefficient
+              + ")");
     }
   }
 }

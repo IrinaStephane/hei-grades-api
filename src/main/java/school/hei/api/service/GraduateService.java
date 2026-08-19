@@ -1,15 +1,25 @@
 package school.hei.api.service;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.stereotype.Service;
+import school.hei.api.model.CourseAssignment;
+import school.hei.api.model.Group;
+import school.hei.api.model.GroupFlow;
+import school.hei.api.model.User;
+import school.hei.api.model.enums.FlowType;
+import school.hei.api.model.enums.Path;
 import school.hei.api.repository.CourseAssignmentRepository;
 import school.hei.api.repository.CourseRepository;
 import school.hei.api.repository.ExamRepository;
 import school.hei.api.repository.GradeRepository;
+import school.hei.api.repository.GroupFlowRepository;
 import school.hei.api.repository.GroupRepository;
 import school.hei.api.repository.UserRepository;
 
@@ -19,6 +29,7 @@ public class GraduateService {
 
   private final UserRepository userRepository;
   private final GroupRepository groupRepository;
+  private final GroupFlowRepository groupFlowRepository;
   private final CourseAssignmentRepository courseAssignmentRepository;
   private final CourseRepository courseRepository;
   private final ExamRepository examRepository;
@@ -50,6 +61,7 @@ public class GraduateService {
 
     return students.stream()
         .map(student -> toGraduate(student, path))
+        .filter(g -> !g.getResults().isEmpty())
         .filter(g -> g.getResults().stream().allMatch(r -> r.getFinalGrade() >= 10))
         .sorted(Comparator.comparingDouble(Graduate::getGeneralAverage).reversed())
         .toList();
@@ -102,13 +114,62 @@ public class GraduateService {
   }
 
   private List<StudentInfo> studentsOfPromotion(String promotionId, String path) {
-    throw new UnsupportedOperationException(
-        "Depends on Group/GroupFlow entities - to implement once available on dev");
+    List<Group> allGroups = groupRepository.findByPromotionId(promotionId);
+
+    List<Group> groups;
+    if (path != null) {
+      Path pathEnum = Path.valueOf(path);
+      groups = allGroups.stream().filter(g -> g.getPath() == pathEnum).toList();
+    } else {
+      groups = allGroups;
+    }
+
+    Map<String, List<GroupFlow>> flowsByStudent = new HashMap<>();
+    for (Group group : groups) {
+      List<GroupFlow> flows =
+          groupFlowRepository.findByGroupIdOrderByFlowDatetimeAsc(group.getId());
+      for (GroupFlow flow : flows) {
+        String studentId = flow.getStudent().getId();
+        flowsByStudent.computeIfAbsent(studentId, k -> new ArrayList<>()).add(flow);
+      }
+    }
+
+    List<StudentInfo> students = new ArrayList<>();
+    for (var entry : flowsByStudent.entrySet()) {
+      String studentId = entry.getKey();
+      List<GroupFlow> flows = entry.getValue();
+
+      GroupFlow latestFlow =
+          flows.stream().max(Comparator.comparing(GroupFlow::getFlowDatetime)).orElse(null);
+
+      if (latestFlow != null && latestFlow.getFlowType() == FlowType.JOIN) {
+        List<String> groupIds = flows.stream().map(f -> f.getGroup().getId()).distinct().toList();
+        User student = latestFlow.getStudent();
+        students.add(
+            new StudentInfo(studentId, student.getFirstName(), student.getLastName(), groupIds));
+      }
+    }
+
+    return students;
   }
 
-  private List<school.hei.api.model.CourseAssignment> courseAssignmentsForGroups(
-      List<String> groupIds, String path) {
-    throw new UnsupportedOperationException(
-        "Depends on CourseAssignment/Group entities - to implement once available on dev");
+  private List<CourseAssignment> courseAssignmentsForGroups(List<String> groupIds, String path) {
+    List<CourseAssignment> assignments = new ArrayList<>();
+    for (String groupId : groupIds) {
+      assignments.addAll(courseAssignmentRepository.findByGroupId(groupId));
+    }
+
+    Map<String, CourseAssignment> uniqueMap = new HashMap<>();
+    for (CourseAssignment assignment : assignments) {
+      uniqueMap.putIfAbsent(assignment.getId(), assignment);
+    }
+    assignments = new ArrayList<>(uniqueMap.values());
+
+    if (path != null) {
+      Path pathEnum = Path.valueOf(path);
+      assignments = assignments.stream().filter(a -> a.getGroup().getPath() == pathEnum).toList();
+    }
+
+    return assignments;
   }
 }
