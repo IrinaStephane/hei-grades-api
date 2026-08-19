@@ -1,9 +1,10 @@
 package school.hei.api.service.event;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -57,10 +58,14 @@ class TranscriptRequestedServiceTest {
   }
 
   @Test
-  void accept_unknown_student_throws() {
+  void accept_unknown_student_logs_and_returns_early() {
     var event = TranscriptRequested.builder().studentId("unknown").year(2025).build();
     when(userRepository.findById("unknown")).thenReturn(Optional.empty());
 
-    assertThrows(java.util.NoSuchElementException.class, () -> subject.accept(event));
+    assertDoesNotThrow(() -> subject.accept(event));
+
+    verify(pdfGenerator, never()).generate(any(), any());
+    verify(bucketComponent, never()).upload(any(), any());
+    verify(mailer, never()).accept(any());
   }
 }

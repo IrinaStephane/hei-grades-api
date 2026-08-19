@@ -23,6 +23,7 @@ import school.hei.api.repository.CourseAssignmentRepository;
 import school.hei.api.repository.ExamRepository;
 import school.hei.api.repository.GradeHistoryRepository;
 import school.hei.api.repository.GradeRepository;
+import school.hei.api.repository.UserRepository;
 import school.hei.api.repository.model.Exam;
 import school.hei.api.repository.model.Grade;
 import school.hei.api.repository.model.GradeHistory;
@@ -38,9 +39,14 @@ class GradeServiceTest {
   private final ExamRepository examRepository = mock(ExamRepository.class);
   private final CourseAssignmentRepository courseAssignmentRepository =
       mock(CourseAssignmentRepository.class);
+  private final UserRepository userRepository = mock(UserRepository.class);
   private final GradeService subject =
       new GradeService(
-          gradeRepository, gradeHistoryRepository, examRepository, courseAssignmentRepository);
+          gradeRepository,
+          gradeHistoryRepository,
+          examRepository,
+          courseAssignmentRepository,
+          userRepository);
 
   private static Grade aGrade() {
     return Grade.builder()
