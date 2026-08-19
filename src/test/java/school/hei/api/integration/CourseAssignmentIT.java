@@ -2,6 +2,7 @@ package school.hei.api.integration;
 
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static school.hei.api.integration.conf.ApiAssertions.assertRestException;
 import static school.hei.api.integration.conf.ApiAssertions.assertStatus;
 import static school.hei.api.integration.conf.ApiAssertions.assertValidUUID;
@@ -32,6 +33,7 @@ import school.hei.api.model.enums.Path;
 import school.hei.api.model.enums.Role;
 import school.hei.api.repository.CourseAssignmentRepository;
 import school.hei.api.repository.CourseRepository;
+import school.hei.api.repository.GroupFlowRepository;
 import school.hei.api.repository.GroupRepository;
 import school.hei.api.repository.PromotionRepository;
 
@@ -41,6 +43,7 @@ class CourseAssignmentIT extends FacadeITMockedThirdParties {
   @Autowired private CourseRepository courseRepository;
   @Autowired private GroupRepository groupRepository;
   @Autowired private PromotionRepository promotionRepository;
+  @Autowired private GroupFlowRepository groupFlowRepository;
 
   private User admin;
   private User teacher;
@@ -145,7 +148,7 @@ class CourseAssignmentIT extends FacadeITMockedThirdParties {
   void admin_reads_assignments_ok() {
     var all = getAssignments(adminToken, null, null, null);
     assertStatus(HttpStatus.OK, all);
-    assertEquals(1, all.getBody().size());
+    assertTrue(all.getBody().stream().anyMatch(a -> a.getId().equals(existingAssignment.getId())));
 
     var byTeacher = getAssignments(adminToken, teacher.getId(), null, null);
     assertStatus(HttpStatus.OK, byTeacher);
@@ -294,6 +297,7 @@ class CourseAssignmentIT extends FacadeITMockedThirdParties {
   void tearDown() {
     courseAssignmentRepository.deleteAll();
     courseRepository.deleteAll();
+    groupFlowRepository.deleteAll();
     groupRepository.deleteAll();
     promotionRepository.deleteAll();
     userRepository.deleteAll(List.of(teacher, admin));

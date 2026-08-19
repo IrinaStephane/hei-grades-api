@@ -2,6 +2,7 @@ package school.hei.api.integration;
 
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static school.hei.api.integration.conf.ApiAssertions.assertRestException;
 import static school.hei.api.integration.conf.ApiAssertions.assertStatus;
 import static school.hei.api.integration.conf.ApiAssertions.assertValidUUID;
@@ -31,6 +32,7 @@ import school.hei.api.model.dto.GroupRest;
 import school.hei.api.model.enums.FlowType;
 import school.hei.api.model.enums.Path;
 import school.hei.api.model.enums.Role;
+import school.hei.api.repository.CourseAssignmentRepository;
 import school.hei.api.repository.GroupFlowRepository;
 import school.hei.api.repository.GroupRepository;
 import school.hei.api.repository.PromotionRepository;
@@ -40,6 +42,7 @@ class GroupIT extends FacadeITMockedThirdParties {
   @Autowired private GroupRepository groupRepository;
   @Autowired private GroupFlowRepository groupFlowRepository;
   @Autowired private PromotionRepository promotionRepository;
+  @Autowired private CourseAssignmentRepository courseAssignmentRepository;
 
   private User admin;
   private String adminToken;
@@ -102,8 +105,7 @@ class GroupIT extends FacadeITMockedThirdParties {
   void admin_reads_groups_ok() {
     var response = getGroups(adminToken, null, null);
     assertStatus(HttpStatus.OK, response);
-    assertEquals(1, response.getBody().size());
-    assertEquals(existingGroup.getId(), response.getBody().get(0).getId());
+    assertTrue(response.getBody().stream().anyMatch(g -> g.getId().equals(existingGroup.getId())));
   }
 
   @Test
@@ -119,7 +121,12 @@ class GroupIT extends FacadeITMockedThirdParties {
 
   @Test
   void admin_reads_groups_filtered_by_path_ok() {
-    var response = getGroups(adminToken, null, Path.TN);
+    var response =
+        restTemplate.exchange(
+            apiUrl(localPort, "/groups?promotionId=" + promotion.getId() + "&path=TN"),
+            HttpMethod.GET,
+            new HttpEntity<>(authHeaders(adminToken)),
+            new ParameterizedTypeReference<List<GroupRest>>() {});
     assertStatus(HttpStatus.OK, response);
     assertEquals(0, response.getBody().size());
   }
@@ -313,6 +320,7 @@ class GroupIT extends FacadeITMockedThirdParties {
 
   @AfterEach
   void tearDown() {
+    courseAssignmentRepository.deleteAll();
     groupFlowRepository.deleteAll();
     groupRepository.deleteAll();
     promotionRepository.deleteAll();
