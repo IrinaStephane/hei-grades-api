@@ -6,8 +6,6 @@ info:
     tracking across a 3-year curriculum. Built with Spring Boot and the
     POJA architecture.
   version: 1.0.0
-servers:
-  - url: /api
 security:
   - bearerAuth: []
 
@@ -56,8 +54,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
 
   /users:
     get:
@@ -66,26 +64,19 @@ paths:
       description: Admin only. Supports filtering by role.
       operationId: getUsers
       parameters:
-        - $ref: '#/components/parameters/Page'
-        - $ref: '#/components/parameters/PageSize'
         - name: role
           in: query
           schema:
             $ref: '#/components/schemas/Role'
       responses:
         '200':
-          description: Paginated list of users
-          headers:
-            X-Total-Count:
-              $ref: '#/components/headers/XTotalCount'
+          description: List of users
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/User'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
     post:
@@ -164,6 +155,8 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
 
   /users/{id}/group_flows:
     parameters:
@@ -222,13 +215,7 @@ paths:
         '202':
           description: >
             Transcript generation accepted (async). An email with the
-            S3 download link will be sent once the PDF is ready. The
-            response indicates the scope and provisional status
-            computed at request time.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TranscriptRequestAck'
+            S3 download link will be sent once the PDF is ready.
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
@@ -239,23 +226,17 @@ paths:
       tags: [ promotions ]
       summary: List promotions
       operationId: getPromotions
-      parameters:
-        - $ref: '#/components/parameters/Page'
-        - $ref: '#/components/parameters/PageSize'
       responses:
         '200':
-          description: Paginated list of promotions
-          headers:
-            X-Total-Count:
-              $ref: '#/components/headers/XTotalCount'
+          description: List of promotions
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/Promotion'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
     post:
       tags: [ promotions ]
       summary: Create a promotion
@@ -327,6 +308,8 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
 
   /promotions/{id}/students:
     parameters:
@@ -416,8 +399,6 @@ paths:
       summary: List groups
       operationId: getGroups
       parameters:
-        - $ref: '#/components/parameters/Page'
-        - $ref: '#/components/parameters/PageSize'
         - name: promotion_id
           in: query
           schema:
@@ -428,18 +409,15 @@ paths:
             $ref: '#/components/schemas/Path'
       responses:
         '200':
-          description: Paginated list of groups
-          headers:
-            X-Total-Count:
-              $ref: '#/components/headers/XTotalCount'
+          description: List of groups
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/Group'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
     post:
       tags: [ groups ]
       summary: Create a group
@@ -511,6 +489,8 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
 
   /groups/{id}/flows:
     parameters:
@@ -545,23 +525,17 @@ paths:
       tags: [ courses ]
       summary: List courses
       operationId: getCourses
-      parameters:
-        - $ref: '#/components/parameters/Page'
-        - $ref: '#/components/parameters/PageSize'
       responses:
         '200':
-          description: Paginated list of courses
-          headers:
-            X-Total-Count:
-              $ref: '#/components/headers/XTotalCount'
+          description: List of courses
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/Course'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
     post:
       tags: [ courses ]
       summary: Create a course
@@ -633,6 +607,8 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
 
   /course_assignments:
     get:
@@ -641,8 +617,6 @@ paths:
       description: Filterable by teacher, group, or course.
       operationId: getCourseAssignments
       parameters:
-        - $ref: '#/components/parameters/Page'
-        - $ref: '#/components/parameters/PageSize'
         - name: teacher_id
           in: query
           schema:
@@ -657,18 +631,15 @@ paths:
             type: string
       responses:
         '200':
-          description: Paginated list of course assignments
-          headers:
-            X-Total-Count:
-              $ref: '#/components/headers/XTotalCount'
+          description: List of course assignments
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/CourseAssignment'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
     post:
       tags: [ course_assignments ]
       summary: Create a course assignment
@@ -744,6 +715,8 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
 
   /exams:
     get:
@@ -751,26 +724,21 @@ paths:
       summary: List exams
       operationId: getExams
       parameters:
-        - $ref: '#/components/parameters/Page'
-        - $ref: '#/components/parameters/PageSize'
         - name: course_assignment_id
           in: query
           schema:
             type: string
       responses:
         '200':
-          description: Paginated list of exams
-          headers:
-            X-Total-Count:
-              $ref: '#/components/headers/XTotalCount'
+          description: List of exams
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/Exam'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
     post:
       tags: [ exams ]
       summary: Create an exam
@@ -842,6 +810,8 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
 
   /grades:
     get:
@@ -852,8 +822,6 @@ paths:
         assignments. Student sees only their own grades.
       operationId: getGrades
       parameters:
-        - $ref: '#/components/parameters/Page'
-        - $ref: '#/components/parameters/PageSize'
         - name: student_id
           in: query
           schema:
@@ -864,18 +832,15 @@ paths:
             type: string
       responses:
         '200':
-          description: Paginated list of grades
-          headers:
-            X-Total-Count:
-              $ref: '#/components/headers/XTotalCount'
+          description: List of grades
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/Grade'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
 
   /grades/{id}:
     parameters:
@@ -951,20 +916,6 @@ components:
       bearerFormat: JWT
 
   parameters:
-    Page:
-      name: page
-      in: query
-      schema:
-        type: integer
-        default: 1
-        minimum: 1
-    PageSize:
-      name: page_size
-      in: query
-      schema:
-        type: integer
-        default: 20
-        maximum: 100
     UserId:
       name: id
       in: path
@@ -1008,12 +959,6 @@ components:
       schema:
         type: string
 
-  headers:
-    XTotalCount:
-      description: Total number of items across all pages
-      schema:
-        type: integer
-
   responses:
     BadRequest:
       description: Invalid request
@@ -1035,6 +980,12 @@ components:
             $ref: '#/components/schemas/RestException'
     NotFound:
       description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RestException'
+    Conflict:
+      description: Cannot delete because the resource is still referenced
       content:
         application/json:
           schema:
@@ -1393,29 +1344,3 @@ components:
             counts 4x as much as a 1-credit course in the average.
             general_average = sum(final_grade_i * credits_i) / sum(credits_i)
             over every course of the student's track (EL or TN).
-
-    TranscriptRequestAck:
-      type: object
-      properties:
-        student_id:
-          type: string
-        year:
-          type: integer
-          nullable: true
-          description: Null when the transcript covers the full 3-year curriculum
-        scope:
-          type: string
-          enum: [ ANNUAL, CUMULATIVE_3_YEARS ]
-        is_complete:
-          type: boolean
-          description: >
-            False if at least one course of the requested scope still
-            has a missing final grade (provisional transcript), true
-            otherwise.
-        credits_earned:
-          type: integer
-          description: Sum of credits for courses passed (score >= 10) so far
-        general_average:
-          type: number
-          format: double
-          description: Weighted (by credits) average computed at request time
