@@ -59,10 +59,4 @@ public class PromotionController {
   public List<StudentSummaryRest> getPromotionStudents(@PathVariable String id) {
     return promotionService.getStudents(id);
   }
-
-  // GET /{id}/graduates and GET /{id}/graduates/export are NOT
-  // implemented here: they require the average/diploma computation
-  // owned by Personne B (Grade, GradeHistory) combined with
-  // GroupService.getCourseAssignmentsFollowedByStudent(...) from this
-  // package. Coordinate on where that logic + controller method lives.
 }

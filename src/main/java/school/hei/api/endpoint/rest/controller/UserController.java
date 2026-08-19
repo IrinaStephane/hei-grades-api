@@ -65,9 +65,4 @@ public class UserController {
   public List<GroupFlowRest> getUserGroupFlows(@PathVariable String id) {
     return groupFlowMapper.toRest(groupService.getGroupFlowHistory(id));
   }
-
-  // POST /{id}/transcript is NOT implemented here: it triggers the async
-  // PDF generation + email flow, which is Personne B's responsibility
-  // (mail + endpoint/event package). Coordinate with them on where the
-  // handler for this route lives.
 }
