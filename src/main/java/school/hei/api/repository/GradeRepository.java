@@ -15,6 +15,8 @@ public interface GradeRepository extends JpaRepository<Grade, String> {
 
   List<Grade> findByStudentIdAndExamId(String studentId, String examId);
 
+  boolean existsByExamIdAndStudentId(String examId, String studentId);
+
   List<Grade> findByStudentIdAndIsFinalTrue(String studentId);
 
   @Query(
