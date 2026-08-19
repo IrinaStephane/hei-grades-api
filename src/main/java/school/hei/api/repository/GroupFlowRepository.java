@@ -12,4 +12,6 @@ public interface GroupFlowRepository extends JpaRepository<GroupFlow, String> {
   List<GroupFlow> findByGroupIdOrderByFlowDatetimeAsc(String groupId);
 
   Optional<GroupFlow> findFirstByStudentIdOrderByFlowDatetimeDesc(String studentId);
+
+  List<GroupFlow> findByStudentIdInOrderByFlowDatetimeDesc(List<String> studentIds);
 }

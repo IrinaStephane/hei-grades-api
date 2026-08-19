@@ -128,8 +128,8 @@ class PromotionServiceTest {
             .build();
     when(promotionRepository.findById("p1")).thenReturn(Optional.of(promotion));
     when(userRepository.findByRole(Role.STUDENT)).thenReturn(List.of(student));
-    when(groupFlowRepository.findFirstByStudentIdOrderByFlowDatetimeDesc("s1"))
-        .thenReturn(Optional.of(joinFlow));
+    when(groupFlowRepository.findByStudentIdInOrderByFlowDatetimeDesc(List.of("s1")))
+        .thenReturn(List.of(joinFlow));
 
     var summaries = subject.getStudents("p1");
 
@@ -156,10 +156,8 @@ class PromotionServiceTest {
     when(promotionRepository.findById("p1")).thenReturn(Optional.of(promotion));
     when(userRepository.findByRole(Role.STUDENT))
         .thenReturn(List.of(leftStudent, neverJoinedStudent));
-    when(groupFlowRepository.findFirstByStudentIdOrderByFlowDatetimeDesc("s1"))
-        .thenReturn(Optional.of(leaveFlow));
-    when(groupFlowRepository.findFirstByStudentIdOrderByFlowDatetimeDesc("s2"))
-        .thenReturn(Optional.empty());
+    when(groupFlowRepository.findByStudentIdInOrderByFlowDatetimeDesc(List.of("s1", "s2")))
+        .thenReturn(List.of(leaveFlow));
 
     var summaries = subject.getStudents("p1");
 

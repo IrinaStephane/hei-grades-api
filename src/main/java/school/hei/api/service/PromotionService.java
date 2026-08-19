@@ -1,6 +1,10 @@
 package school.hei.api.service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,38 +66,43 @@ public class PromotionService {
 
   public List<StudentSummaryRest> getStudents(String promotionId) {
     getEntityById(promotionId);
-    return userRepository.findByRole(Role.STUDENT).stream()
-        .map(toStudentSummaryIfInPromotion(promotionId))
-        .filter(java.util.Objects::nonNull)
+    List<User> students = userRepository.findByRole(Role.STUDENT);
+    Map<String, GroupFlow> lastFlowByStudent =
+        groupFlowRepository
+            .findByStudentIdInOrderByFlowDatetimeDesc(students.stream().map(User::getId).toList())
+            .stream()
+            .collect(
+                Collectors.toMap(
+                    flow -> flow.getStudent().getId(),
+                    Function.identity(),
+                    (first, second) -> first));
+    return students.stream()
+        .map(student -> toStudentSummaryIfInPromotion(promotionId, student, lastFlowByStudent))
+        .filter(Objects::nonNull)
         .toList();
   }
 
-  private java.util.function.Function<User, StudentSummaryRest> toStudentSummaryIfInPromotion(
-      String promotionId) {
-    return student -> {
-      GroupFlow lastFlow =
-          groupFlowRepository
-              .findFirstByStudentIdOrderByFlowDatetimeDesc(student.getId())
-              .orElse(null);
-      if (lastFlow == null || lastFlow.getFlowType() != FlowType.JOIN) {
-        return null;
-      }
-      if (!lastFlow.getGroup().getPromotion().getId().equals(promotionId)) {
-        return null;
-      }
-      return StudentSummaryRest.builder()
-          .id(student.getId())
-          .firstName(student.getFirstName())
-          .lastName(student.getLastName())
-          .currentGroup(
-              GroupRest.builder()
-                  .id(lastFlow.getGroup().getId())
-                  .ref(lastFlow.getGroup().getRef())
-                  .path(lastFlow.getGroup().getPath())
-                  .promotionId(promotionId)
-                  .build())
-          .build();
-    };
+  private StudentSummaryRest toStudentSummaryIfInPromotion(
+      String promotionId, User student, Map<String, GroupFlow> lastFlowByStudent) {
+    GroupFlow lastFlow = lastFlowByStudent.get(student.getId());
+    if (lastFlow == null || lastFlow.getFlowType() != FlowType.JOIN) {
+      return null;
+    }
+    if (!lastFlow.getGroup().getPromotion().getId().equals(promotionId)) {
+      return null;
+    }
+    return StudentSummaryRest.builder()
+        .id(student.getId())
+        .firstName(student.getFirstName())
+        .lastName(student.getLastName())
+        .currentGroup(
+            GroupRest.builder()
+                .id(lastFlow.getGroup().getId())
+                .ref(lastFlow.getGroup().getRef())
+                .path(lastFlow.getGroup().getPath())
+                .promotionId(promotionId)
+                .build())
+        .build();
   }
 
   private Promotion getEntityById(String id) {

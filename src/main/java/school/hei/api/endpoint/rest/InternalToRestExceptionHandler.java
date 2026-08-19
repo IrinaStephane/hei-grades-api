@@ -4,6 +4,7 @@ import jakarta.persistence.OptimisticLockException;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.LockAcquisitionException;
 import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -101,6 +102,12 @@ public class InternalToRestExceptionHandler {
   ResponseEntity<RestException> handleNotImplemented(NotImplementedException e) {
     log.error("Not implemented", e);
     return new ResponseEntity<>(toRest(e, HttpStatus.NOT_IMPLEMENTED), HttpStatus.NOT_IMPLEMENTED);
+  }
+
+  @ExceptionHandler(value = {DataIntegrityViolationException.class})
+  ResponseEntity<RestException> handleDataIntegrityViolation(DataIntegrityViolationException e) {
+    log.warn("Data integrity violation", e);
+    return new ResponseEntity<>(toRest(e, HttpStatus.CONFLICT), HttpStatus.CONFLICT);
   }
 
   @ExceptionHandler(value = {Exception.class})

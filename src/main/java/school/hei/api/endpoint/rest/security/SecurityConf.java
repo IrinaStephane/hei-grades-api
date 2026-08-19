@@ -97,6 +97,7 @@ public class SecurityConf {
                     .authenticated()
                     .requestMatchers(GET, "/auth/me")
                     .authenticated()
+                    // users
                     .requestMatchers(GET, "/users")
                     .hasRole(ADMIN.name())
                     .requestMatchers(POST, "/users")
@@ -134,8 +135,7 @@ public class SecurityConf {
                     .hasAnyRole(TEACHER.name(), ADMIN.name())
                     .requestMatchers(PUT, "/api/grades/*")
                     .hasAnyRole(TEACHER.name(), ADMIN.name())
-                    .requestMatchers(POST, "/api/grades")
-                    .hasAnyRole(TEACHER.name(), ADMIN.name())
+                    // exams
                     .requestMatchers(GET, "/api/exams")
                     .authenticated()
                     .requestMatchers(GET, "/api/exams/*")
@@ -146,10 +146,12 @@ public class SecurityConf {
                     .hasAnyRole(TEACHER.name(), ADMIN.name())
                     .requestMatchers(DELETE, "/api/exams/*")
                     .hasRole(ADMIN.name())
+                    // graduates
                     .requestMatchers(GET, "/api/promotions/*/graduates")
                     .hasRole(ADMIN.name())
                     .requestMatchers(GET, "/api/promotions/*/graduates/export")
                     .hasRole(ADMIN.name())
+                    // promotions
                     .requestMatchers(GET, "/promotions")
                     .authenticated()
                     .requestMatchers(GET, "/promotions/*")
@@ -162,6 +164,7 @@ public class SecurityConf {
                     .hasRole(ADMIN.name())
                     .requestMatchers(GET, "/promotions/*/students")
                     .hasAnyRole(TEACHER.name(), ADMIN.name())
+                    // course assignments
                     .requestMatchers(GET, "/course_assignments")
                     .authenticated()
                     .requestMatchers(GET, "/course_assignments/*")
@@ -172,6 +175,7 @@ public class SecurityConf {
                     .hasRole(ADMIN.name())
                     .requestMatchers(DELETE, "/course_assignments/*")
                     .hasRole(ADMIN.name())
+                    // courses
                     .requestMatchers(GET, "/courses")
                     .authenticated()
                     .requestMatchers(GET, "/courses/*")
@@ -182,6 +186,7 @@ public class SecurityConf {
                     .hasRole(ADMIN.name())
                     .requestMatchers(DELETE, "/courses/*")
                     .hasRole(ADMIN.name())
+                    // groups
                     .requestMatchers(GET, "/groups")
                     .authenticated()
                     .requestMatchers(GET, "/groups/*")

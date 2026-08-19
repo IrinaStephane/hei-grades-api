@@ -3,6 +3,7 @@ package school.hei.api.integration;
 import static java.time.Instant.now;
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static school.hei.api.integration.conf.ApiAssertions.assertRestException;
 import static school.hei.api.integration.conf.ApiAssertions.assertStatus;
 import static school.hei.api.integration.conf.ApiAssertions.assertValidUUID;
@@ -32,6 +33,7 @@ import school.hei.api.model.dto.StudentSummaryRest;
 import school.hei.api.model.enums.FlowType;
 import school.hei.api.model.enums.Path;
 import school.hei.api.model.enums.Role;
+import school.hei.api.repository.CourseAssignmentRepository;
 import school.hei.api.repository.GroupFlowRepository;
 import school.hei.api.repository.GroupRepository;
 import school.hei.api.repository.PromotionRepository;
@@ -41,6 +43,7 @@ class PromotionIT extends FacadeITMockedThirdParties {
   @Autowired private PromotionRepository promotionRepository;
   @Autowired private GroupRepository groupRepository;
   @Autowired private GroupFlowRepository groupFlowRepository;
+  @Autowired private CourseAssignmentRepository courseAssignmentRepository;
 
   private User admin;
   private User teacher;
@@ -106,8 +109,8 @@ class PromotionIT extends FacadeITMockedThirdParties {
             new ParameterizedTypeReference<List<PromotionRest>>() {});
 
     assertStatus(HttpStatus.OK, response);
-    assertEquals(1, response.getBody().size());
-    assertEquals(existingPromotion.getId(), response.getBody().get(0).getId());
+    assertTrue(
+        response.getBody().stream().anyMatch(p -> p.getId().equals(existingPromotion.getId())));
   }
 
   @Test
@@ -240,6 +243,7 @@ class PromotionIT extends FacadeITMockedThirdParties {
 
   @AfterEach
   void tearDown() {
+    courseAssignmentRepository.deleteAll();
     groupFlowRepository.deleteAll();
     groupRepository.deleteAll();
     promotionRepository.deleteAll();

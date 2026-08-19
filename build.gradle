@@ -10,7 +10,7 @@ plugins {
 
     id 'jacoco'
 
-
+    
 }
 
 jacoco {
@@ -71,6 +71,8 @@ jacocoTestReport {
         html.required = true
     }
     afterEvaluate {
+        // Need to be duplicated like this from jacocoTestCoverageVerification,
+        // else display coverageRate is inconsistent with what was computed during coverage...
         classDirectories.setFrom(files(classDirectories.files.collect {
             fileTree(dir: it, exclude: [
                     "**/gen/**"
@@ -114,7 +116,6 @@ dependencies {
     testImplementation 'org.testcontainers:testcontainers-postgresql:2.0.2'
     implementation 'org.postgresql:postgresql:42.6.0'
     implementation 'org.hibernate.orm:hibernate-community-dialects:6.4.3.Final'
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.3'
 
@@ -152,15 +153,13 @@ dependencies {
     testImplementation 'org.testcontainers:testcontainers-junit-jupiter:2.0.2'
     testImplementation 'org.junit-pioneer:junit-pioneer:2.2.0'
 
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'com.openhtmltopdf:openhtmltopdf-pdfbox:1.0.10'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'com.nimbusds:nimbus-jose-jwt:10.0.2'
-    implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.3'
-    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.3'
-    testImplementation 'org.springframework.security:spring-security-test'
+implementation 'org.springframework.boot:spring-boot-starter-validation'
+implementation 'com.openhtmltopdf:openhtmltopdf-pdfbox:1.0.10'
+implementation 'org.springframework.boot:spring-boot-starter-security'
+implementation 'io.jsonwebtoken:jjwt:0.13.0'
+testImplementation 'org.springframework.security:spring-security-test'
+implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+implementation 'org.apache.poi:poi-ooxml:5.5.1'
 
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
-    implementation 'org.apache.poi:poi-ooxml:5.2.5'
+implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
 }
