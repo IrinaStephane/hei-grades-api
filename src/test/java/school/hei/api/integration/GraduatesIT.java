@@ -64,6 +64,7 @@ class GraduatesIT extends FacadeITMockedThirdParties {
   private User s2;
   private User s3;
   private User s4;
+  private User s5;
   private Promotion promotion;
   private Group k1;
   private Group k2;
@@ -93,6 +94,7 @@ class GraduatesIT extends FacadeITMockedThirdParties {
     s2 = saveUser(Role.STUDENT, "grad-s2-" + randomUUID() + "@hei.school");
     s3 = saveUser(Role.STUDENT, "grad-s3-" + randomUUID() + "@hei.school");
     s4 = saveUser(Role.STUDENT, "grad-s4-" + randomUUID() + "@hei.school");
+    s5 = saveUser(Role.STUDENT, "grad-s5-" + randomUUID() + "@hei.school");
 
     when(bucketComponent.upload(any(), anyString()))
         .thenReturn(new FileHash(FileHashAlgorithm.NONE, null));
@@ -142,6 +144,11 @@ class GraduatesIT extends FacadeITMockedThirdParties {
     saveFlow(k3, s4, FlowType.JOIN, ENTRY_YEAR);
     saveFlow(k3, s4, FlowType.JOIN, ENTRY_YEAR + 1);
     saveFlow(k3, s4, FlowType.JOIN, ENTRY_YEAR + 2);
+    saveFlow(k3, s5, FlowType.JOIN, ENTRY_YEAR);
+    saveFlow(k3, s5, FlowType.LEAVE, ENTRY_YEAR + 1);
+    saveFlow(k2, s5, FlowType.JOIN, ENTRY_YEAR + 1);
+    saveFlow(k2, s5, FlowType.LEAVE, ENTRY_YEAR + 2);
+    saveFlow(k1, s5, FlowType.JOIN, ENTRY_YEAR + 2);
   }
 
   private Course saveCourse(String code) {
@@ -211,33 +218,35 @@ class GraduatesIT extends FacadeITMockedThirdParties {
 
   @Test
   void graduates_include_only_students_who_completed_the_full_curriculum() {
-    // s1 switched groups mid-curriculum and passed everything: graduate.
     saveGrade(s1, e24, 15.0);
     saveGrade(s1, e25, 14.0);
     saveGrade(s1, e26, 16.0);
-    // s2 attended only the first year: not a graduate.
     saveGrade(s2, e24, 15.0);
-    // s3 attended three years but failed the last course: not a graduate.
     saveGrade(s3, e24, 15.0);
     saveGrade(s3, e25, 14.0);
     saveGrade(s3, e26, 8.0);
-    // s4 followed the TN track and passed everything: graduate.
     saveGrade(s4, e24tn, 12.0);
     saveGrade(s4, e25tn, 13.0);
     saveGrade(s4, e26tn, 11.0);
+    saveGrade(s5, e24tn, 15.0);
+    saveGrade(s5, e25, 13.0);
+    saveGrade(s5, e26, 16.0);
 
     var elGraduates = getGraduates("EL");
     var tnGraduates = getGraduates("TN");
     var allGraduates = getGraduates(null);
 
-    assertEquals(1, elGraduates.size());
+    assertEquals(2, elGraduates.size());
     assertEquals(s1.getId(), elGraduates.get(0).getStudentId());
+    assertEquals(s5.getId(), elGraduates.get(1).getStudentId());
     assertEquals(1, tnGraduates.size());
     assertEquals(s4.getId(), tnGraduates.get(0).getStudentId());
-    assertEquals(2, allGraduates.size());
+    assertEquals(3, allGraduates.size());
     assertEquals(s1.getId(), allGraduates.get(0).getStudentId());
-    assertEquals(s4.getId(), allGraduates.get(1).getStudentId());
+    assertEquals(s5.getId(), allGraduates.get(1).getStudentId());
+    assertEquals(s4.getId(), allGraduates.get(2).getStudentId());
     assertTrue(allGraduates.get(0).getGeneralAverage() > allGraduates.get(1).getGeneralAverage());
+    assertTrue(allGraduates.get(1).getGeneralAverage() > allGraduates.get(2).getGeneralAverage());
   }
 
   @Test
@@ -268,6 +277,7 @@ class GraduatesIT extends FacadeITMockedThirdParties {
     gradeRepository.findByStudentId(s2.getId()).forEach(gradeRepository::delete);
     gradeRepository.findByStudentId(s3.getId()).forEach(gradeRepository::delete);
     gradeRepository.findByStudentId(s4.getId()).forEach(gradeRepository::delete);
+    gradeRepository.findByStudentId(s5.getId()).forEach(gradeRepository::delete);
     List.of(k1, k2, k3)
         .forEach(
             group ->
@@ -291,6 +301,7 @@ class GraduatesIT extends FacadeITMockedThirdParties {
     userRepository.delete(s2);
     userRepository.delete(s3);
     userRepository.delete(s4);
+    userRepository.delete(s5);
     userRepository.delete(teacher);
     userRepository.delete(admin);
   }

@@ -76,12 +76,10 @@ public class GraduateService {
   }
 
   private Graduate toGraduate(StudentInfo student, String path, List<Integer> schoolYears) {
-    Path pathEnum = path == null ? null : Path.valueOf(path);
-
     List<CourseResult> results = new ArrayList<>();
     List<Integer> resultYears = new ArrayList<>();
     for (int year : schoolYears) {
-      var assignments = studentCurriculumService.assignmentsForYear(student.id(), year, pathEnum);
+      var assignments = studentCurriculumService.assignmentsForYear(student.id(), year);
       if (assignments.isEmpty()) {
         continue;
       }

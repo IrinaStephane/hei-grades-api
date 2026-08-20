@@ -175,7 +175,6 @@ class GraduateServiceTest {
     var g2 = group("g2", Path.EL);
     var g3 = group("g3", Path.TN);
     var c1 = course("c1", "C1", 30);
-    // s2 attends only one year: his group only carries a first-year course.
     var a1 = assignment("a1", c1, g1, 2022);
     var e1 = exam("e1", "a1");
     when(groupRepository.findByPromotionId(PROMO_ID)).thenReturn(List.of(g1, g2, g3));
@@ -274,7 +273,6 @@ class GraduateServiceTest {
     when(examRepository.findByCourseAssignmentId("a2tn")).thenReturn(List.of(e2tn));
     when(examRepository.findByCourseAssignmentId("a3tn")).thenReturn(List.of(e3tn));
 
-    // s1: EL (g1 then g1), s4: TN (g3)
     var s1 = student("s1");
     var s4 = student("s4");
     when(groupFlowRepository.findByStudentIdOrderByFlowDatetimeAsc("s1"))
@@ -318,9 +316,66 @@ class GraduateServiceTest {
     assertEquals(1, tnGraduates.size());
     assertEquals("s4", tnGraduates.get(0).getStudentId());
     assertEquals(2, allGraduates.size());
-    // s1 (15) ranked above s4 (12)
     assertEquals("s1", allGraduates.get(0).getStudentId());
     assertEquals("s4", allGraduates.get(1).getStudentId());
+  }
+
+  @Test
+  void graduate_is_kept_in_final_path_list_even_after_early_common_core_group_of_other_path() {
+    promotion(2022);
+    var g1 = group("g1", Path.EL);
+    var g2 = group("g2", Path.EL);
+    var g3 = group("g3", Path.TN);
+    var c1 = course("c1", "C1", 30);
+    var c2 = course("c2", "C2", 30);
+    var c3 = course("c3", "C3", 30);
+    var a1 = assignment("a1", c1, g3, 2022);
+    var a2 = assignment("a2", c2, g1, 2023);
+    var a3 = assignment("a3", c3, g1, 2024);
+    var e1 = exam("e1", "a1");
+    var e2 = exam("e2", "a2");
+    var e3 = exam("e3", "a3");
+    when(groupRepository.findByPromotionId(PROMO_ID)).thenReturn(List.of(g1, g2, g3));
+    when(courseAssignmentRepository.findByGroupId("g1")).thenReturn(List.of(a2, a3));
+    when(courseAssignmentRepository.findByGroupId("g2")).thenReturn(List.of());
+    when(courseAssignmentRepository.findByGroupId("g3")).thenReturn(List.of(a1));
+    when(examRepository.findByCourseAssignmentId("a1")).thenReturn(List.of(e1));
+    when(examRepository.findByCourseAssignmentId("a2")).thenReturn(List.of(e2));
+    when(examRepository.findByCourseAssignmentId("a3")).thenReturn(List.of(e3));
+
+    var s1 = student("s1");
+    when(groupFlowRepository.findByStudentIdOrderByFlowDatetimeAsc("s1"))
+        .thenReturn(
+            List.of(
+                flow("f1", g3, "s1", FlowType.JOIN, "2022-09-01T08:00:00Z"),
+                flow("f2", g3, "s1", FlowType.LEAVE, "2023-08-31T12:00:00Z"),
+                flow("f3", g1, "s1", FlowType.JOIN, "2023-09-01T08:00:00Z"),
+                flow("f4", g1, "s1", FlowType.JOIN, "2024-09-01T08:00:00Z")));
+    when(groupFlowRepository.findByGroupIdOrderByFlowDatetimeAsc("g1"))
+        .thenReturn(
+            List.of(
+                flow("f3", g1, "s1", FlowType.JOIN, "2023-09-01T08:00:00Z"),
+                flow("f4", g1, "s1", FlowType.JOIN, "2024-09-01T08:00:00Z")));
+    when(groupFlowRepository.findByGroupIdOrderByFlowDatetimeAsc("g2")).thenReturn(List.of());
+    when(groupFlowRepository.findByGroupIdOrderByFlowDatetimeAsc("g3"))
+        .thenReturn(
+            List.of(
+                flow("f1", g3, "s1", FlowType.JOIN, "2022-09-01T08:00:00Z"),
+                flow("f2", g3, "s1", FlowType.LEAVE, "2023-08-31T12:00:00Z")));
+    when(gradeRepository.findByExamId("e1")).thenReturn(List.of(grade("g1", "e1", "s1", 15.0)));
+    when(gradeRepository.findByExamId("e2")).thenReturn(List.of(grade("g2", "e2", "s1", 14.0)));
+    when(gradeRepository.findByExamId("e3")).thenReturn(List.of(grade("g3", "e3", "s1", 16.0)));
+
+    var elGraduates = subject.getGraduates(PROMO_ID, "EL");
+    var tnGraduates = subject.getGraduates(PROMO_ID, "TN");
+    var allGraduates = subject.getGraduates(PROMO_ID, null);
+
+    assertEquals(1, elGraduates.size());
+    assertEquals("s1", elGraduates.get(0).getStudentId());
+    assertEquals(3, elGraduates.get(0).getResults().size());
+    assertTrue(tnGraduates.isEmpty());
+    assertEquals(1, allGraduates.size());
+    assertEquals("s1", allGraduates.get(0).getStudentId());
   }
 
   @Test

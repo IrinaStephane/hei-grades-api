@@ -51,8 +51,8 @@ public class PdfTranscriptGenerator {
   private List<CourseTranscript> computeCourses(String studentId, Integer year) {
     List<CourseAssignment> assignments =
         year != null
-            ? studentCurriculumService.assignmentsForYear(studentId, year, null)
-            : studentCurriculumService.allAssignments(studentId, null);
+            ? studentCurriculumService.assignmentsForYear(studentId, year)
+            : studentCurriculumService.allAssignments(studentId);
 
     List<CourseTranscript> result = new ArrayList<>();
     for (CourseAssignment assignment : assignments) {
@@ -102,7 +102,7 @@ public class PdfTranscriptGenerator {
   }
 
   String computeStatus(String studentId) {
-    var assignments = studentCurriculumService.allAssignments(studentId, null);
+    var assignments = studentCurriculumService.allAssignments(studentId);
     List<String> expectedExamIds =
         assignments.stream()
             .flatMap(a -> examRepository.findByCourseAssignmentId(a.getId()).stream())

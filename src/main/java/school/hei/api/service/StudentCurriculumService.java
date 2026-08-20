@@ -13,7 +13,6 @@ import school.hei.api.model.CourseAssignment;
 import school.hei.api.model.Group;
 import school.hei.api.model.GroupFlow;
 import school.hei.api.model.enums.FlowType;
-import school.hei.api.model.enums.Path;
 import school.hei.api.repository.CourseAssignmentRepository;
 import school.hei.api.repository.GroupFlowRepository;
 
@@ -54,20 +53,19 @@ public class StudentCurriculumService {
         .map(GroupFlow::getGroup);
   }
 
-  public List<CourseAssignment> assignmentsForYear(String studentId, int year, Path path) {
+  public List<CourseAssignment> assignmentsForYear(String studentId, int year) {
     var group = groupForYear(studentId, year).orElse(null);
     if (group == null) {
       return List.of();
     }
     return courseAssignmentRepository.findByGroupId(group.getId()).stream()
         .filter(a -> a.getYear() != null && a.getYear() == year)
-        .filter(a -> path == null || a.getGroup().getPath() == path)
         .toList();
   }
 
-  public List<CourseAssignment> allAssignments(String studentId, Path path) {
+  public List<CourseAssignment> allAssignments(String studentId) {
     return schoolYearsOf(studentId).stream()
-        .flatMap(year -> assignmentsForYear(studentId, year, path).stream())
+        .flatMap(year -> assignmentsForYear(studentId, year).stream())
         .distinct()
         .toList();
   }

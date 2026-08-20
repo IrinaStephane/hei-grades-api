@@ -9,11 +9,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import school.hei.api.endpoint.rest.model.RestException;
 import school.hei.api.model.exception.BadRequestException;
 import school.hei.api.model.exception.ConflictException;
@@ -108,6 +110,19 @@ public class InternalToRestExceptionHandler {
   ResponseEntity<RestException> handleDataIntegrityViolation(DataIntegrityViolationException e) {
     log.warn("Data integrity violation", e);
     return new ResponseEntity<>(toRest(e, HttpStatus.CONFLICT), HttpStatus.CONFLICT);
+  }
+
+  @ExceptionHandler(value = {HttpRequestMethodNotSupportedException.class})
+  ResponseEntity<RestException> handleMethodNotSupported(HttpRequestMethodNotSupportedException e) {
+    log.info("Method not supported", e);
+    return new ResponseEntity<>(
+        toRest(e, HttpStatus.METHOD_NOT_ALLOWED), HttpStatus.METHOD_NOT_ALLOWED);
+  }
+
+  @ExceptionHandler(value = {NoResourceFoundException.class})
+  ResponseEntity<RestException> handleNoResourceFound(NoResourceFoundException e) {
+    log.info("Resource not found", e);
+    return new ResponseEntity<>(toRest(e, HttpStatus.NOT_FOUND), HttpStatus.NOT_FOUND);
   }
 
   @ExceptionHandler(value = {Exception.class})
