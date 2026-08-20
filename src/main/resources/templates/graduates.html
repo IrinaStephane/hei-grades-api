@@ -20,11 +20,12 @@
         <td th:text="${promotion.ref}">2023</td>
         <td th:text="${promotion.entryYear}">2023</td>
         <td>
-            <a th:href="@{/promotions/{id}/graduates/export(id=${promotion.id}, path='EL')}">
+            <a th:href="@{/promotions/{id}/graduates/export(id=${promotion.id}, path='EL')}"
+               style="display:inline-block; padding:6px 12px; background-color:#4CAF50; color:white; text-decoration:none; border-radius:4px; margin-right:4px;">
                 Diplômés EL
             </a>
-            &nbsp;
-            <a th:href="@{/promotions/{id}/graduates/export(id=${promotion.id}, path='TN')}">
+            <a th:href="@{/promotions/{id}/graduates/export(id=${promotion.id}, path='TN')}"
+               style="display:inline-block; padding:6px 12px; background-color:#2196F3; color:white; text-decoration:none; border-radius:4px;">
                 Diplômés TN
             </a>
         </td>
