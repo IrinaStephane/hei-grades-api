@@ -24,7 +24,7 @@ public class XlsxGraduatesExporter {
         var g = graduates.get(i);
         Row row = sheet.createRow(i + 1);
         row.createCell(0).setCellValue(i + 1);
-        row.createCell(1).setCellValue(g.getStudentId());
+        row.createCell(1).setCellValue(g.getStudentMatricule());
         row.createCell(2).setCellValue(g.getLastName());
         row.createCell(3).setCellValue(g.getFirstName());
         row.createCell(4).setCellValue(Math.round(g.getGeneralAverage() * 100.0) / 100.0);

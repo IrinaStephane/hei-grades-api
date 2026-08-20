@@ -141,6 +141,8 @@ public class PdfTranscriptGenerator {
         .append(" ")
         .append(escapedLastName)
         .append("</h1>");
+    String matricule = student.getMatricule() == null ? student.getId() : student.getMatricule();
+    sb.append("<p>Matricule : ").append(HtmlUtils.htmlEscape(matricule)).append("</p>");
     sb.append("<p>Période : ").append(scope).append("</p>");
     sb.append("<p>Statut : ").append(status).append("</p>");
     sb.append("<table><thead><tr>");
