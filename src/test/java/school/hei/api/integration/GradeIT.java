@@ -127,7 +127,7 @@ class GradeIT extends FacadeITMockedThirdParties {
 
     var response =
         restTemplate.exchange(
-            apiUrl(localPort, "/api/grades"),
+            apiUrl(localPort, "/grades"),
             HttpMethod.POST,
             entity(admin, body),
             school.hei.api.repository.model.Grade.class);
@@ -148,7 +148,7 @@ class GradeIT extends FacadeITMockedThirdParties {
 
     var response =
         restTemplate.exchange(
-            apiUrl(localPort, "/api/grades"),
+            apiUrl(localPort, "/grades"),
             HttpMethod.POST,
             entity(admin, body),
             RestException.class);
@@ -162,7 +162,7 @@ class GradeIT extends FacadeITMockedThirdParties {
 
     var response =
         restTemplate.exchange(
-            apiUrl(localPort, "/api/grades"),
+            apiUrl(localPort, "/grades"),
             HttpMethod.POST,
             entity(admin, body),
             RestException.class);
@@ -176,7 +176,7 @@ class GradeIT extends FacadeITMockedThirdParties {
 
     var response =
         restTemplate.exchange(
-            apiUrl(localPort, "/api/grades"),
+            apiUrl(localPort, "/grades"),
             HttpMethod.POST,
             entity(admin, body),
             RestException.class);
@@ -194,7 +194,7 @@ class GradeIT extends FacadeITMockedThirdParties {
 
     var response =
         restTemplate.exchange(
-            apiUrl(localPort, "/api/grades"),
+            apiUrl(localPort, "/grades"),
             HttpMethod.POST,
             entity(student, body),
             RestException.class);
@@ -208,7 +208,7 @@ class GradeIT extends FacadeITMockedThirdParties {
 
     var response =
         restTemplate.exchange(
-            apiUrl(localPort, "/api/grades/" + grade.getId()),
+            apiUrl(localPort, "/grades/" + grade.getId()),
             HttpMethod.PUT,
             entity(admin, body),
             school.hei.api.repository.model.Grade.class);
@@ -222,14 +222,14 @@ class GradeIT extends FacadeITMockedThirdParties {
   void admin_get_grade_history_ok() {
     var body = new GradeUpdateRequest(18.0, "First change", true);
     restTemplate.exchange(
-        apiUrl(localPort, "/api/grades/" + grade.getId()),
+        apiUrl(localPort, "/grades/" + grade.getId()),
         HttpMethod.PUT,
         entity(admin, body),
         school.hei.api.repository.model.Grade.class);
 
     var response =
         restTemplate.exchange(
-            apiUrl(localPort, "/api/grades/" + grade.getId() + "/history"),
+            apiUrl(localPort, "/grades/" + grade.getId() + "/history"),
             HttpMethod.GET,
             new HttpEntity<>(authHeaders(admin)),
             new ParameterizedTypeReference<

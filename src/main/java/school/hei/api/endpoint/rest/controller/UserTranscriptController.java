@@ -15,7 +15,7 @@ public class UserTranscriptController {
 
   private final TranscriptService transcriptService;
 
-  @PostMapping("/api/users/{id}/transcript")
+  @PostMapping("/users/{id}/transcript")
   @ResponseStatus(HttpStatus.ACCEPTED)
   public void requestUserTranscript(
       @PathVariable("id") String userId, @RequestParam(required = false) Integer year) {

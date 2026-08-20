@@ -217,29 +217,29 @@ class SecurityIT extends FacadeITMockedThirdParties {
 
   @Test
   void student_reads_own_grade_ok() {
-    assertStatus(HttpStatus.OK, getWith(studentToken, "/api/grades/" + grade.getId()));
+    assertStatus(HttpStatus.OK, getWith(studentToken, "/grades/" + grade.getId()));
   }
 
   @Test
   void student_reads_other_student_grade_forbidden() {
-    assertStatus(HttpStatus.FORBIDDEN, getWith(studentToken, "/api/grades/" + otherGrade.getId()));
+    assertStatus(HttpStatus.FORBIDDEN, getWith(studentToken, "/grades/" + otherGrade.getId()));
   }
 
   @Test
   void teacher_reads_own_course_grade_ok() {
-    assertStatus(HttpStatus.OK, getWith(teacherToken, "/api/grades/" + grade.getId()));
+    assertStatus(HttpStatus.OK, getWith(teacherToken, "/grades/" + grade.getId()));
   }
 
   @Test
   void other_teacher_reads_grade_forbidden() {
-    assertStatus(HttpStatus.FORBIDDEN, getWith(otherTeacherToken, "/api/grades/" + grade.getId()));
+    assertStatus(HttpStatus.FORBIDDEN, getWith(otherTeacherToken, "/grades/" + grade.getId()));
   }
 
   @Test
   void student_cannot_update_grade() {
     var response =
         restTemplate.exchange(
-            apiUrl(localPort, "/api/grades/" + grade.getId()),
+            apiUrl(localPort, "/grades/" + grade.getId()),
             HttpMethod.PUT,
             new HttpEntity<>(
                 new GradeUpdateRequest(13.0, "Correction", null), authHeaders(studentToken)),
@@ -251,7 +251,7 @@ class SecurityIT extends FacadeITMockedThirdParties {
   void teacher_updates_own_grade_ok() {
     var response =
         restTemplate.exchange(
-            apiUrl(localPort, "/api/grades/" + grade.getId()),
+            apiUrl(localPort, "/grades/" + grade.getId()),
             HttpMethod.PUT,
             new HttpEntity<>(
                 new GradeUpdateRequest(14.5, "Correction collective", true),
@@ -267,7 +267,7 @@ class SecurityIT extends FacadeITMockedThirdParties {
   void teacher_creates_exam_on_own_assignment_ok() {
     var response =
         restTemplate.exchange(
-            apiUrl(localPort, "/api/exams"),
+            apiUrl(localPort, "/exams"),
             HttpMethod.POST,
             new HttpEntity<>(
                 new ExamCreationRequest(
@@ -282,7 +282,7 @@ class SecurityIT extends FacadeITMockedThirdParties {
   void student_cannot_create_exam() {
     var response =
         restTemplate.exchange(
-            apiUrl(localPort, "/api/exams"),
+            apiUrl(localPort, "/exams"),
             HttpMethod.POST,
             new HttpEntity<>(
                 new ExamCreationRequest(
@@ -296,7 +296,7 @@ class SecurityIT extends FacadeITMockedThirdParties {
   void student_cannot_delete_exam() {
     var response =
         restTemplate.exchange(
-            apiUrl(localPort, "/api/exams/" + exam.getId()),
+            apiUrl(localPort, "/exams/" + exam.getId()),
             HttpMethod.DELETE,
             new HttpEntity<>(authHeaders(studentToken)),
             RestException.class);
@@ -308,7 +308,7 @@ class SecurityIT extends FacadeITMockedThirdParties {
     var gradedExam = aExam(assignment, "Examen final", 0.25);
     var response =
         restTemplate.exchange(
-            apiUrl(localPort, "/api/exams/" + gradedExam.getId()),
+            apiUrl(localPort, "/exams/" + gradedExam.getId()),
             HttpMethod.DELETE,
             new HttpEntity<>(authHeaders(adminToken)),
             Void.class);

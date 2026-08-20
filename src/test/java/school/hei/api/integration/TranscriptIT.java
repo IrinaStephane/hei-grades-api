@@ -35,7 +35,7 @@ class TranscriptIT extends FacadeITMockedThirdParties {
   void admin_requests_transcript_accepted() {
     var response =
         restTemplate.exchange(
-            apiUrl(localPort, "/api/users/" + student.getId() + "/transcript"),
+            apiUrl(localPort, "/users/" + student.getId() + "/transcript"),
             HttpMethod.POST,
             entity(admin),
             Object.class);
@@ -47,7 +47,7 @@ class TranscriptIT extends FacadeITMockedThirdParties {
   void student_requests_own_transcript_accepted() {
     var response =
         restTemplate.exchange(
-            apiUrl(localPort, "/api/users/" + student.getId() + "/transcript"),
+            apiUrl(localPort, "/users/" + student.getId() + "/transcript"),
             HttpMethod.POST,
             entity(student),
             Object.class);
@@ -59,7 +59,7 @@ class TranscriptIT extends FacadeITMockedThirdParties {
   void requests_transcript_for_unknown_user_not_found() {
     var response =
         restTemplate.exchange(
-            apiUrl(localPort, "/api/users/" + NOT_EXISTING_ID + "/transcript"),
+            apiUrl(localPort, "/users/" + NOT_EXISTING_ID + "/transcript"),
             HttpMethod.POST,
             entity(admin),
             Object.class);
@@ -71,7 +71,7 @@ class TranscriptIT extends FacadeITMockedThirdParties {
   void requests_transcript_without_token_is_forbidden() {
     var response =
         restTemplate.exchange(
-            apiUrl(localPort, "/api/users/" + student.getId() + "/transcript"),
+            apiUrl(localPort, "/users/" + student.getId() + "/transcript"),
             HttpMethod.POST,
             null,
             Object.class);

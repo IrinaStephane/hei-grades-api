@@ -103,10 +103,7 @@ class HealthControllerIT extends FacadeITMockedThirdParties {
   void protected_route_without_token_is_forbidden() {
     var response =
         restTemplate.exchange(
-            apiUrl(localPort, "/api/promotions/promo-1/graduates"),
-            HttpMethod.GET,
-            null,
-            String.class);
+            apiUrl(localPort, "/promotions/promo-1/graduates"), HttpMethod.GET, null, String.class);
     assertStatus(HttpStatus.FORBIDDEN, response);
   }
 

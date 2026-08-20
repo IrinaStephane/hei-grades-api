@@ -24,13 +24,13 @@ public class PromotionGraduatesController {
   private final XlsxGraduatesExporter xlsxExporter;
   private final BucketComponent bucketComponent;
 
-  @GetMapping("/api/promotions/{id}/graduates")
+  @GetMapping("/promotions/{id}/graduates")
   public List<Graduate> getPromotionGraduates(
       @PathVariable("id") String promotionId, @RequestParam(required = false) String path) {
     return graduateService.getGraduates(promotionId, path);
   }
 
-  @GetMapping("/api/promotions/{id}/graduates/export")
+  @GetMapping("/promotions/{id}/graduates/export")
   public ResponseEntity<Void> exportPromotionGraduates(
       @PathVariable("id") String promotionId, @RequestParam(required = false) String path) {
     var graduates = graduateService.getGraduates(promotionId, path);

@@ -139,7 +139,7 @@ class GraduatesIT extends FacadeITMockedThirdParties {
 
     var response =
         restTemplate.exchange(
-            apiUrl(localPort, "/api/promotions/" + promotion.getId() + "/graduates?path=EL"),
+            apiUrl(localPort, "/promotions/" + promotion.getId() + "/graduates?path=EL"),
             HttpMethod.GET,
             new HttpEntity<>(authHeaders(admin)),
             new ParameterizedTypeReference<List<Graduate>>() {});
@@ -165,7 +165,7 @@ class GraduatesIT extends FacadeITMockedThirdParties {
 
     var response =
         restTemplate.exchange(
-            apiUrl(localPort, "/api/promotions/" + promotion.getId() + "/graduates/export?path=EL"),
+            apiUrl(localPort, "/promotions/" + promotion.getId() + "/graduates/export?path=EL"),
             HttpMethod.GET,
             new HttpEntity<>(authHeaders(admin)),
             Object.class);

@@ -26,17 +26,17 @@ public class ExamController {
 
   private final ExamService examService;
 
-  @GetMapping("/api/exams")
+  @GetMapping("/exams")
   public List<Exam> getExams(@RequestParam(required = false) String courseAssignmentId) {
     return examService.getByCourseAssignment(courseAssignmentId);
   }
 
-  @GetMapping("/api/exams/{id}")
+  @GetMapping("/exams/{id}")
   public Exam getExamById(@PathVariable String id) {
     return examService.getById(id);
   }
 
-  @PostMapping("/api/exams")
+  @PostMapping("/exams")
   @ResponseStatus(HttpStatus.CREATED)
   public Exam createExam(
       @AuthenticationPrincipal Principal principal, @Valid @RequestBody ExamCreationRequest body) {
@@ -49,7 +49,7 @@ public class ExamController {
         Role.valueOf(principal.getRole()));
   }
 
-  @PutMapping("/api/exams/{id}")
+  @PutMapping("/exams/{id}")
   public Exam updateExam(
       @AuthenticationPrincipal Principal principal,
       @PathVariable String id,
@@ -63,7 +63,7 @@ public class ExamController {
         Role.valueOf(principal.getRole()));
   }
 
-  @DeleteMapping("/api/exams/{id}")
+  @DeleteMapping("/exams/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void deleteExam(@PathVariable String id) {
     examService.delete(id);

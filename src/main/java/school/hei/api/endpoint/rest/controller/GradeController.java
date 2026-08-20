@@ -27,7 +27,7 @@ public class GradeController {
 
   private final GradeService gradeService;
 
-  @GetMapping("/api/grades")
+  @GetMapping("/grades")
   public List<Grade> getGrades(
       @AuthenticationPrincipal Principal principal,
       @RequestParam(required = false) String studentId,
@@ -36,7 +36,7 @@ public class GradeController {
         studentId, examId, principal.getUserId(), Role.valueOf(principal.getRole()));
   }
 
-  @PostMapping("/api/grades")
+  @PostMapping("/grades")
   @ResponseStatus(HttpStatus.CREATED)
   public Grade createGrade(
       @AuthenticationPrincipal Principal principal, @Valid @RequestBody GradeCreationRequest body) {
@@ -49,12 +49,12 @@ public class GradeController {
         Role.valueOf(principal.getRole()));
   }
 
-  @GetMapping("/api/grades/{id}")
+  @GetMapping("/grades/{id}")
   public Grade getGradeById(@AuthenticationPrincipal Principal principal, @PathVariable String id) {
     return gradeService.getById(id, principal.getUserId(), Role.valueOf(principal.getRole()));
   }
 
-  @PutMapping("/api/grades/{id}")
+  @PutMapping("/grades/{id}")
   public Grade updateGrade(
       @AuthenticationPrincipal Principal principal,
       @PathVariable String id,
@@ -68,7 +68,7 @@ public class GradeController {
         Role.valueOf(principal.getRole()));
   }
 
-  @GetMapping("/api/grades/{id}/history")
+  @GetMapping("/grades/{id}/history")
   public List<GradeHistory> getGradeHistory(
       @AuthenticationPrincipal Principal principal, @PathVariable String id) {
     return gradeService.getHistory(id, principal.getUserId(), Role.valueOf(principal.getRole()));
