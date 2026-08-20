@@ -18,6 +18,7 @@ public class UserRest {
   private String firstName;
   private String lastName;
   private String email;
+  private String matricule;
   private Role role;
   private Instant createdAt;
 }
