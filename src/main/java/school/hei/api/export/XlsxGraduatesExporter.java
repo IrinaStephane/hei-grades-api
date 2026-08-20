@@ -27,7 +27,7 @@ public class XlsxGraduatesExporter {
         row.createCell(1).setCellValue(g.getStudentId());
         row.createCell(2).setCellValue(g.getLastName());
         row.createCell(3).setCellValue(g.getFirstName());
-        row.createCell(4).setCellValue(g.getGeneralAverage());
+        row.createCell(4).setCellValue(Math.round(g.getGeneralAverage() * 100.0) / 100.0);
       }
 
       var out = new ByteArrayOutputStream();
