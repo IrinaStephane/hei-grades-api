@@ -113,8 +113,8 @@ class SecurityIT extends FacadeITMockedThirdParties {
                 .year(2024)
                 .semester(1)
                 .build());
-    exam = examRepository.save(aExam(assignment, "Contrôle continu"));
-    otherExam = examRepository.save(aExam(assignment, "Rattrapage"));
+    exam = examRepository.save(aExam(assignment, "Contrôle continu", 0.25));
+    otherExam = examRepository.save(aExam(assignment, "Rattrapage", 0.25));
     grade =
         gradeRepository.save(
             Grade.builder()
@@ -135,14 +135,14 @@ class SecurityIT extends FacadeITMockedThirdParties {
                 .build());
   }
 
-  private Exam aExam(CourseAssignment assignment, String title) {
+  private Exam aExam(CourseAssignment assignment, String title, double coefficient) {
     return examRepository.save(
         Exam.builder()
             .id(randomUUID().toString())
             .courseAssignmentId(assignment.getId())
             .title(title)
             .examinationDate(now())
-            .coefficient(0.5)
+            .coefficient(coefficient)
             .build());
   }
 
@@ -305,7 +305,7 @@ class SecurityIT extends FacadeITMockedThirdParties {
 
   @Test
   void admin_deletes_exam_ok() {
-    var gradedExam = aExam(assignment, "Examen final");
+    var gradedExam = aExam(assignment, "Examen final", 0.25);
     var response =
         restTemplate.exchange(
             apiUrl(localPort, "/api/exams/" + gradedExam.getId()),

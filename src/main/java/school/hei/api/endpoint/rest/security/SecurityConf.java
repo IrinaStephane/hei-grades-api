@@ -135,6 +135,8 @@ public class SecurityConf {
                     .hasAnyRole(TEACHER.name(), ADMIN.name())
                     .requestMatchers(PUT, "/api/grades/*")
                     .hasAnyRole(TEACHER.name(), ADMIN.name())
+                    .requestMatchers(POST, "/api/grades")
+                    .hasAnyRole(TEACHER.name(), ADMIN.name())
                     // exams
                     .requestMatchers(GET, "/api/exams")
                     .authenticated()
