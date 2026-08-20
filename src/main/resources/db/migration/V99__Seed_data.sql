@@ -1,4 +1,12 @@
--- Demo seed data
+-- Demo seed data mirroring the real HEI organisation:
+--   - promotions are named by group letter: promG (entered 2022), promJ (entered 2023),
+--     promK (entered 2024, current L1).
+--   - L1 has 5 groups (G1-G5 / J1-J5 / K1-K5), all on the common track.
+--   - L2 S3 keeps 3 groups (G1-G3 / J1-J3 / K1-K3): groups 4 and 5 are dissolved and
+--     their students are spread over the 3 remaining groups.
+--   - L2 S4 introduces the track choice: EL (Ecosysteme Logiciel) in groups 1-2,
+--     TN (Transformation Numerique) in group 3. Courses diverge from S4 on.
+--   - L3 keeps the same 3-group / 2-track layout.
 -- Passwords: all users share the BCrypt hash of "password123"
 do
 $$
@@ -10,7 +18,7 @@ begin
     ('admin_hei', 'Admin', 'HEI', 'admin@hei.school', password_hash, 'ADMIN', '2022-08-15 09:00:00'),
     ('teacher_rakoto', 'Mamy', 'Rakotomalala', 'mamy.rakotomalala@hei.school', password_hash, 'TEACHER', '2022-08-20 09:00:00'),
     ('teacher_andrianjatovo', 'Fara', 'Andrianjatovo', 'fara.andrianjatovo@hei.school', password_hash, 'TEACHER', '2022-08-20 09:00:00'),
-    -- promotion 2022 (3rd year in 2024-2025)
+    -- promotion G (2022) - 3rd year in 2024-2025, graduates in 2025
     ('s22_lova', 'Lova', 'Randrianarisoa', 'lova.randrianarisoa@hei.school', password_hash, 'STUDENT', '2022-09-01 08:00:00'),
     ('s22_tiana', 'Tiana', 'Rakotomalala', 'tiana.rakotomalala@hei.school', password_hash, 'STUDENT', '2022-09-01 08:00:00'),
     ('s22_miora', 'Miora', 'Andrianjaka', 'miora.andrianjaka@hei.school', password_hash, 'STUDENT', '2022-09-01 08:00:00'),
@@ -19,7 +27,7 @@ begin
     ('s22_feno', 'Feno', 'Rabeantoandro', 'feno.rabeantoandro@hei.school', password_hash, 'STUDENT', '2022-09-01 08:00:00'),
     ('s22_hery', 'Hery', 'Ramanantsoa', 'hery.ramanantsoa@hei.school', password_hash, 'STUDENT', '2022-09-01 08:00:00'),
     ('s22_sitraka', 'Sitraka', 'Randriamampionona', 'sitraka.randriamampionona@hei.school', password_hash, 'STUDENT', '2022-09-01 08:00:00'),
-    -- promotion 2023 (2nd year in 2024-2025)
+    -- promotion J (2023) - 2nd year in 2024-2025, chooses its track at L2 S4
     ('s23_andry', 'Andry', 'Ravoahangy', 'andry.ravoahangy@hei.school', password_hash, 'STUDENT', '2023-09-01 08:00:00'),
     ('s23_hasina', 'Hasina', 'Rakotoniaina', 'hasina.rakotoniaina@hei.school', password_hash, 'STUDENT', '2023-09-01 08:00:00'),
     ('s23_fanja', 'Fanja', 'Ramananandrasana', 'fanja.ramananandrasana@hei.school', password_hash, 'STUDENT', '2023-09-01 08:00:00'),
@@ -27,90 +35,150 @@ begin
     ('s23_tahiry', 'Tahiry', 'Razafindrakoto', 'tahiry.razafindrakoto@hei.school', password_hash, 'STUDENT', '2023-09-01 08:00:00'),
     ('s23_vonjy', 'Vonjy', 'Randriambololona', 'vonjy.randriambololona@hei.school', password_hash, 'STUDENT', '2023-09-01 08:00:00'),
     ('s23_zo', 'Zo', 'Rasolofoniaina', 'zo.rasolofoniaina@hei.school', password_hash, 'STUDENT', '2023-09-01 08:00:00'),
-    ('s23_lala', 'Lala', 'Rakotondrazaka', 'lala.rakotondrazaka@hei.school', password_hash, 'STUDENT', '2023-09-01 08:00:00');
+    ('s23_lala', 'Lala', 'Rakotondrazaka', 'lala.rakotondrazaka@hei.school', password_hash, 'STUDENT', '2023-09-01 08:00:00'),
+    -- promotion K (2024) - 1st year in 2024-2025, currently spread over K1-K5
+    ('s24_mialy', 'Mialy', 'Rasoanaivo', 'mialy.rasoanaivo@hei.school', password_hash, 'STUDENT', '2024-09-01 08:00:00'),
+    ('s24_anto', 'Anto', 'Raveloson', 'anto.raveloson@hei.school', password_hash, 'STUDENT', '2024-09-01 08:00:00'),
+    ('s24_bema', 'Bema', 'Randrianarison', 'bema.randrianarison@hei.school', password_hash, 'STUDENT', '2024-09-01 08:00:00'),
+    ('s24_cecil', 'Cecil', 'Rakotomalala', 'cecil.rakotomalala@hei.school', password_hash, 'STUDENT', '2024-09-01 08:00:00'),
+    ('s24_dina', 'Dina', 'Andriamihaja', 'dina.andriamihaja@hei.school', password_hash, 'STUDENT', '2024-09-01 08:00:00'),
+    ('s24_ela', 'Ela', 'Razafintsalama', 'ela.razafintsalama@hei.school', password_hash, 'STUDENT', '2024-09-01 08:00:00'),
+    ('s24_fetra', 'Fetra', 'Rakotondrabe', 'fetra.rakotondrabe@hei.school', password_hash, 'STUDENT', '2024-09-01 08:00:00'),
+    ('s24_gaby', 'Gaby', 'Andrianjafy', 'gaby.andrianjafy@hei.school', password_hash, 'STUDENT', '2024-09-01 08:00:00');
 
   -- ============================================================ promotions
   insert into promotions (id, ref, entry_year) values
-    ('promo2022', '2022', 2022),
-    ('promo2023', '2023', 2023);
+    ('promG', 'G', 2022),
+    ('promJ', 'J', 2023),
+    ('promK', 'K', 2024);
 
   -- ============================================================ groups
+  -- 5 groups in L1; groups 4 and 5 are dissolved at the start of L2 (their students
+  -- are spread over groups 1-3). The EL/TN path only matters from L2 S4 onward:
+  -- groups 1-2 host EL, group 3 hosts TN.
   insert into groups (id, ref, path, promotion_id) values
-    ('group22_k1', 'K1', 'EL', 'promo2022'),
-    ('group22_k2', 'K2', 'EL', 'promo2022'),
-    ('group22_tn1', 'TN1', 'TN', 'promo2022'),
-    ('group23_k1', 'K1', 'EL', 'promo2023'),
-    ('group23_k2', 'K2', 'EL', 'promo2023'),
-    ('group23_tn1', 'TN1', 'TN', 'promo2023');
+    ('groupG1', 'G1', 'EL', 'promG'),
+    ('groupG2', 'G2', 'EL', 'promG'),
+    ('groupG3', 'G3', 'TN', 'promG'),
+    ('groupG4', 'G4', 'TN', 'promG'),
+    ('groupG5', 'G5', 'TN', 'promG'),
+    ('groupJ1', 'J1', 'EL', 'promJ'),
+    ('groupJ2', 'J2', 'EL', 'promJ'),
+    ('groupJ3', 'J3', 'TN', 'promJ'),
+    ('groupJ4', 'J4', 'TN', 'promJ'),
+    ('groupJ5', 'J5', 'TN', 'promJ'),
+    ('groupK1', 'K1', 'EL', 'promK'),
+    ('groupK2', 'K2', 'EL', 'promK'),
+    ('groupK3', 'K3', 'TN', 'promK'),
+    ('groupK4', 'K4', 'TN', 'promK'),
+    ('groupK5', 'K5', 'TN', 'promK');
 
   -- ============================================================ courses
-  -- 6 courses per semester, 30 credits per semester (60 credits per year,
-  -- 180 credits over the 3-year curriculum).
+  -- Real HEI L1/L2 S3 courses (from the actual transcript), 60 credits in L1 and L2 S3.
+  -- L2 S4 splits EL (Ecosysteme Logiciel) vs TN (Transformation Numerique), then L3 keeps
+  -- a common core plus the two tracks. 180 credits over the 3-year curriculum.
   create temp table seed_courses (code text primary key, title text, credits int) on commit drop;
   insert into seed_courses values
-    -- L1
-    ('PROG1', 'Programmation I', 8), ('MATH1', 'Mathématiques I', 6), ('SYS1', 'Systèmes I', 4),
-    ('ANG1', 'Anglais I', 4), ('RES1', 'Réseaux I', 4), ('WEB1', 'Développement web I', 4),
-    ('PROG2', 'Programmation II', 8), ('MATH2', 'Mathématiques II', 6), ('BDD1', 'Bases de données I', 6),
-    ('COM1', 'Communication I', 4), ('GPAO1', 'Gestion de projets', 4), ('ANG2', 'Anglais II', 2),
-    -- L2
-    ('PROG3', 'Programmation III', 8), ('SYS2', 'Systèmes II', 6), ('BDD2', 'Bases de données II', 4),
-    ('STAT1', 'Statistiques', 4), ('ARCH1', 'Architecture logicielle', 4), ('SEC1', 'Sécurité I', 4),
-    ('PROG4', 'Programmation IV', 8), ('SYS3', 'Systèmes III', 6), ('WEB2', 'Développement web II', 6),
-    ('RES2', 'Réseaux II', 4), ('AI1', 'Intelligence artificielle I', 4), ('COM2', 'Communication II', 2),
-    -- L3 common
-    ('AI2', 'Intelligence artificielle II', 6), ('SEC2', 'Sécurité II', 4), ('MEM1', 'Mémoire I', 4),
-    ('RES3', 'Réseaux III', 2), ('AI3', 'Intelligence artificielle III', 6), ('SEC3', 'Sécurité III', 4),
-    ('MEM2', 'Mémoire II', 4), ('COM3', 'Communication III', 2),
-    -- L3 EL only
-    ('PROG5', 'Programmation avancée', 8), ('LOG1', 'Logique', 6),
-    ('PROG6', 'Programmation des systèmes', 8), ('LOG2', 'Logique II', 6),
-    -- L3 TN only
-    ('TRA1', 'Télécommunications I', 8), ('IOT1', 'Internet des objets I', 6),
-    ('TRA2', 'Télécommunications II', 8), ('IOT2', 'Internet des objets II', 6);
+    -- L1 (60 credits)
+    ('PROG1', 'Algorithmique', 6),
+    ('PROG2', 'Implementation d''API backend - Programmation orientee objet', 10),
+    ('WEB1', 'Interface web', 6),
+    ('WEB2', 'Applications web globalement connectees', 8),
+    ('SYS1', 'Systemes d''exploitation', 6),
+    ('SYS2', 'Systemes interconnectes', 8),
+    ('LV1', 'Francais - Methodologie universitaire', 4),
+    ('MGT1', 'Travail collaboratif', 4),
+    ('THEORIE1', 'Mathematiques appliquees a l''informatique', 4),
+    ('DONNEES1', 'Bases de donnees structurees', 4),
+    -- L2 S3, common track (30 credits)
+    ('MGT2', 'Gestion de projet', 5),
+    ('PRO1', 'Vie professionnelle', 3),
+    ('LV2', 'Anglais', 4),
+    ('WEB3', 'Applications web globalement connectees - Avance', 8),
+    ('PROG3', 'Implementation d''API backend - suite', 6),
+    ('SYS3', 'Systemes III', 4),
+    -- L2 S4, EL track (30 credits)
+    ('PROG4', 'Qualite et surete des applications', 8),
+    ('ARCH1', 'Architecture logicielle', 6),
+    ('AI1', 'Intelligence artificielle I', 6),
+    ('WEB4', 'Applications web avancees', 4),
+    ('STAT1', 'Statistiques', 4),
+    ('MGT3', 'Gestion de projet avancee', 2),
+    -- L2 S4, TN track (30 credits)
+    ('TN1', 'Transformation numerique I', 10),
+    ('TN2', 'Transformation numerique II', 10),
+    ('METIER1', 'Metiers de la transformation numerique', 10),
+    -- L3 common core (20 credits)
+    ('AI2', 'Intelligence artificielle II', 4),
+    ('SEC2', 'Securite II', 4),
+    ('MEM1', 'Memoire I', 4),
+    ('MEM2', 'Memoire II', 4),
+    ('RES3', 'Reseaux III', 2),
+    ('COM3', 'Communication III', 2),
+    -- L3 EL track (40 credits)
+    ('PROG5', 'Programmation avancee', 8),
+    ('PROG6', 'Programmation des systemes', 8),
+    ('LOG1', 'Logique', 8),
+    ('LOG2', 'Logique II', 6),
+    ('AI3', 'Intelligence artificielle III', 4),
+    ('SEC3', 'Securite III', 6),
+    -- L3 TN track (40 credits)
+    ('TN3', 'Transformation numerique III', 10),
+    ('TN4', 'Transformation numerique IV', 8),
+    ('METIER2', 'Metiers de la transformation numerique II', 8),
+    ('IOT1', 'Internet des objets I', 8),
+    ('TRA1', 'Telecommunications I', 6);
 
   insert into courses (id, code, title, credits)
   select 'course_' || lower(code) || '_id', code, title, credits from seed_courses;
 
   -- ============================================================ course_assignments
-  -- track = 'BOTH' (all groups), 'EL' (EL groups), 'TN' (TN group).
+  -- track = 'BOTH' (common track: all groups), 'EL' (EL groups), 'TN' (TN group).
   -- promotion = the promotion whose groups take this course that year.
   create temp table seed_assignments (code text, year int, semester int, track text, promotion text) on commit drop;
   insert into seed_assignments values
-    -- L1 for promo 2022
-    ('PROG1', 2022, 1, 'BOTH', 'promo2022'), ('MATH1', 2022, 1, 'BOTH', 'promo2022'), ('SYS1', 2022, 1, 'BOTH', 'promo2022'),
-    ('ANG1', 2022, 1, 'BOTH', 'promo2022'), ('RES1', 2022, 1, 'BOTH', 'promo2022'), ('WEB1', 2022, 1, 'BOTH', 'promo2022'),
-    ('PROG2', 2022, 2, 'BOTH', 'promo2022'), ('MATH2', 2022, 2, 'BOTH', 'promo2022'), ('BDD1', 2022, 2, 'BOTH', 'promo2022'),
-    ('COM1', 2022, 2, 'BOTH', 'promo2022'), ('GPAO1', 2022, 2, 'BOTH', 'promo2022'), ('ANG2', 2022, 2, 'BOTH', 'promo2022'),
-    -- L2 for promo 2022
-    ('PROG3', 2023, 1, 'BOTH', 'promo2022'), ('SYS2', 2023, 1, 'BOTH', 'promo2022'), ('BDD2', 2023, 1, 'BOTH', 'promo2022'),
-    ('STAT1', 2023, 1, 'BOTH', 'promo2022'), ('ARCH1', 2023, 1, 'BOTH', 'promo2022'), ('SEC1', 2023, 1, 'BOTH', 'promo2022'),
-    ('PROG4', 2023, 2, 'BOTH', 'promo2022'), ('SYS3', 2023, 2, 'BOTH', 'promo2022'), ('WEB2', 2023, 2, 'BOTH', 'promo2022'),
-    ('RES2', 2023, 2, 'BOTH', 'promo2022'), ('AI1', 2023, 2, 'BOTH', 'promo2022'), ('COM2', 2023, 2, 'BOTH', 'promo2022'),
-    -- L3 for promo 2022
-    ('PROG5', 2024, 1, 'EL', 'promo2022'), ('LOG1', 2024, 1, 'EL', 'promo2022'), ('AI2', 2024, 1, 'BOTH', 'promo2022'),
-    ('SEC2', 2024, 1, 'BOTH', 'promo2022'), ('MEM1', 2024, 1, 'BOTH', 'promo2022'), ('RES3', 2024, 1, 'BOTH', 'promo2022'),
-    ('PROG6', 2024, 2, 'EL', 'promo2022'), ('LOG2', 2024, 2, 'EL', 'promo2022'), ('AI3', 2024, 2, 'BOTH', 'promo2022'),
-    ('SEC3', 2024, 2, 'BOTH', 'promo2022'), ('MEM2', 2024, 2, 'BOTH', 'promo2022'), ('COM3', 2024, 2, 'BOTH', 'promo2022'),
-    ('TRA1', 2024, 1, 'TN', 'promo2022'), ('IOT1', 2024, 1, 'TN', 'promo2022'),
-    ('TRA2', 2024, 2, 'TN', 'promo2022'), ('IOT2', 2024, 2, 'TN', 'promo2022'),
-    -- L1 for promo 2023
-    ('PROG1', 2023, 1, 'BOTH', 'promo2023'), ('MATH1', 2023, 1, 'BOTH', 'promo2023'), ('SYS1', 2023, 1, 'BOTH', 'promo2023'),
-    ('ANG1', 2023, 1, 'BOTH', 'promo2023'), ('RES1', 2023, 1, 'BOTH', 'promo2023'), ('WEB1', 2023, 1, 'BOTH', 'promo2023'),
-    ('PROG2', 2023, 2, 'BOTH', 'promo2023'), ('MATH2', 2023, 2, 'BOTH', 'promo2023'), ('BDD1', 2023, 2, 'BOTH', 'promo2023'),
-    ('COM1', 2023, 2, 'BOTH', 'promo2023'), ('GPAO1', 2023, 2, 'BOTH', 'promo2023'), ('ANG2', 2023, 2, 'BOTH', 'promo2023'),
-    -- L2 for promo 2023
-    ('PROG3', 2024, 1, 'BOTH', 'promo2023'), ('SYS2', 2024, 1, 'BOTH', 'promo2023'), ('BDD2', 2024, 1, 'BOTH', 'promo2023'),
-    ('STAT1', 2024, 1, 'BOTH', 'promo2023'), ('ARCH1', 2024, 1, 'BOTH', 'promo2023'), ('SEC1', 2024, 1, 'BOTH', 'promo2023'),
-    ('PROG4', 2024, 2, 'BOTH', 'promo2023'), ('SYS3', 2024, 2, 'BOTH', 'promo2023'), ('WEB2', 2024, 2, 'BOTH', 'promo2023'),
-    ('RES2', 2024, 2, 'BOTH', 'promo2023'), ('AI1', 2024, 2, 'BOTH', 'promo2023'), ('COM2', 2024, 2, 'BOTH', 'promo2023');
+    -- L1 for promotion G (2022)
+    ('PROG2', 2022, 1, 'BOTH', 'promG'), ('PROG1', 2022, 1, 'BOTH', 'promG'), ('WEB1', 2022, 1, 'BOTH', 'promG'),
+    ('LV1', 2022, 1, 'BOTH', 'promG'), ('MGT1', 2022, 1, 'BOTH', 'promG'),
+    ('WEB2', 2022, 2, 'BOTH', 'promG'), ('SYS2', 2022, 2, 'BOTH', 'promG'), ('SYS1', 2022, 2, 'BOTH', 'promG'),
+    ('THEORIE1', 2022, 2, 'BOTH', 'promG'), ('DONNEES1', 2022, 2, 'BOTH', 'promG'),
+    -- L2 for promotion G (2023): S3 common, S4 split
+    ('MGT2', 2023, 1, 'BOTH', 'promG'), ('PRO1', 2023, 1, 'BOTH', 'promG'), ('LV2', 2023, 1, 'BOTH', 'promG'),
+    ('WEB3', 2023, 1, 'BOTH', 'promG'), ('PROG3', 2023, 1, 'BOTH', 'promG'), ('SYS3', 2023, 1, 'BOTH', 'promG'),
+    ('PROG4', 2023, 2, 'EL', 'promG'), ('ARCH1', 2023, 2, 'EL', 'promG'), ('AI1', 2023, 2, 'EL', 'promG'),
+    ('WEB4', 2023, 2, 'EL', 'promG'), ('STAT1', 2023, 2, 'EL', 'promG'), ('MGT3', 2023, 2, 'EL', 'promG'),
+    ('TN1', 2023, 2, 'TN', 'promG'), ('TN2', 2023, 2, 'TN', 'promG'), ('METIER1', 2023, 2, 'TN', 'promG'),
+    -- L3 for promotion G (2024): common core + EL/TN tracks
+    ('MEM1', 2024, 1, 'BOTH', 'promG'), ('AI2', 2024, 1, 'BOTH', 'promG'), ('SEC2', 2024, 1, 'BOTH', 'promG'),
+    ('RES3', 2024, 1, 'BOTH', 'promG'),
+    ('PROG5', 2024, 1, 'EL', 'promG'), ('LOG1', 2024, 1, 'EL', 'promG'),
+    ('TN3', 2024, 1, 'TN', 'promG'), ('TRA1', 2024, 1, 'TN', 'promG'),
+    ('MEM2', 2024, 2, 'BOTH', 'promG'), ('COM3', 2024, 2, 'BOTH', 'promG'),
+    ('PROG6', 2024, 2, 'EL', 'promG'), ('LOG2', 2024, 2, 'EL', 'promG'), ('AI3', 2024, 2, 'EL', 'promG'), ('SEC3', 2024, 2, 'EL', 'promG'),
+    ('TN4', 2024, 2, 'TN', 'promG'), ('METIER2', 2024, 2, 'TN', 'promG'), ('IOT1', 2024, 2, 'TN', 'promG'),
+    -- L1 for promotion J (2023)
+    ('PROG2', 2023, 1, 'BOTH', 'promJ'), ('PROG1', 2023, 1, 'BOTH', 'promJ'), ('WEB1', 2023, 1, 'BOTH', 'promJ'),
+    ('LV1', 2023, 1, 'BOTH', 'promJ'), ('MGT1', 2023, 1, 'BOTH', 'promJ'),
+    ('WEB2', 2023, 2, 'BOTH', 'promJ'), ('SYS2', 2023, 2, 'BOTH', 'promJ'), ('SYS1', 2023, 2, 'BOTH', 'promJ'),
+    ('THEORIE1', 2023, 2, 'BOTH', 'promJ'), ('DONNEES1', 2023, 2, 'BOTH', 'promJ'),
+    -- L2 for promotion J (2024): S3 common, S4 split
+    ('MGT2', 2024, 1, 'BOTH', 'promJ'), ('PRO1', 2024, 1, 'BOTH', 'promJ'), ('LV2', 2024, 1, 'BOTH', 'promJ'),
+    ('WEB3', 2024, 1, 'BOTH', 'promJ'), ('PROG3', 2024, 1, 'BOTH', 'promJ'), ('SYS3', 2024, 1, 'BOTH', 'promJ'),
+    ('PROG4', 2024, 2, 'EL', 'promJ'), ('ARCH1', 2024, 2, 'EL', 'promJ'), ('AI1', 2024, 2, 'EL', 'promJ'),
+    ('WEB4', 2024, 2, 'EL', 'promJ'), ('STAT1', 2024, 2, 'EL', 'promJ'), ('MGT3', 2024, 2, 'EL', 'promJ'),
+    ('TN1', 2024, 2, 'TN', 'promJ'), ('TN2', 2024, 2, 'TN', 'promJ'), ('METIER1', 2024, 2, 'TN', 'promJ'),
+    -- L1 for promotion K (2024)
+    ('PROG2', 2024, 1, 'BOTH', 'promK'), ('PROG1', 2024, 1, 'BOTH', 'promK'), ('WEB1', 2024, 1, 'BOTH', 'promK'),
+    ('LV1', 2024, 1, 'BOTH', 'promK'), ('MGT1', 2024, 1, 'BOTH', 'promK'),
+    ('WEB2', 2024, 2, 'BOTH', 'promK'), ('SYS2', 2024, 2, 'BOTH', 'promK'), ('SYS1', 2024, 2, 'BOTH', 'promK'),
+    ('THEORIE1', 2024, 2, 'BOTH', 'promK'), ('DONNEES1', 2024, 2, 'BOTH', 'promK');
 
-  -- teacher_rakoto teaches group K1, teacher_andrianjatovo teaches K2 and TN1:
-  -- the same course is taught by two different teachers to different groups.
+  -- teacher_rakoto teaches the EL groups, teacher_andrianjatovo the TN groups:
+  -- the same common-track course is taught by two different teachers to different groups.
   insert into course_assignments (id, course_id, teacher_id, group_id, year, semester)
   select 'ca_' || lower(sa.code) || '_' || sa.year || '_' || g.promotion_id || '_' || g.ref,
          'course_' || lower(sa.code) || '_id',
-         case when g.ref = 'K1' then 'teacher_rakoto' else 'teacher_andrianjatovo' end,
+         case when g.path = 'EL' then 'teacher_rakoto' else 'teacher_andrianjatovo' end,
          g.id, sa.year, sa.semester
   from seed_assignments sa
   join groups g on g.promotion_id = sa.promotion
@@ -119,7 +187,7 @@ begin
   -- ============================================================ exams
   -- Two exams per course: midterm (0.4) + final (0.6), coefficients sum to 1.
   insert into exam (id, course_assignment_id, title, examination_date, coefficient)
-  select 'exam_' || a.id || '_cc', a.id, 'Contrôle continu',
+  select 'exam_' || a.id || '_cc', a.id, 'Controle continu',
          make_timestamp(a.year + case when a.semester = 1 then 0 else 1 end,
                         case when a.semester = 1 then 11 else 4 end, 15, 9, 0, 0),
          0.4::decimal
@@ -131,31 +199,68 @@ begin
   from course_assignments a;
 
   -- ============================================================ group_flows
-  -- s22_lova: 5 events (4 group changes) over the curriculum.
-  -- s22_miora: switches from EL (K1) to TN (TN1) at the start of year 3.
+  -- promotion G: L1 (2022) spread over G1-G5, G4/G5 dissolved at L2 (2023),
+  --   L3 (2024) split into EL (G1/G2) and TN (G3).
+  --   s22_lova: G1 -> G2 -> G1 (3 changes), archetype of the K1 -> K2(EL) -> K1 path.
+  --   s22_miora: switches from EL (G1) to TN (G3) at the start of year 3.
+  -- promotion J: L1 (2023) over J1-J5, dissolution at L2 (2024),
+  --   mid-year track choice at L2 S4 (2025-02).
+  -- promotion K: L1 (2024) over K1-K5, everyone on the common track.
   insert into group_flows (id, group_id, student_id, flow_type, flow_datetime) values
-    ('gf_s22_lova_k1_join', 'group22_k1', 's22_lova', 'JOIN', '2022-09-01 08:00:00'),
-    ('gf_s22_lova_k1_leave', 'group22_k1', 's22_lova', 'LEAVE', '2023-08-31 12:00:00'),
-    ('gf_s22_lova_k2_join', 'group22_k2', 's22_lova', 'JOIN', '2023-09-01 08:00:00'),
-    ('gf_s22_lova_k2_leave', 'group22_k2', 's22_lova', 'LEAVE', '2024-08-30 12:00:00'),
-    ('gf_s22_lova_k1_rejoin', 'group22_k1', 's22_lova', 'JOIN', '2024-09-01 08:00:00'),
-    ('gf_s22_miora_k1_join', 'group22_k1', 's22_miora', 'JOIN', '2022-09-01 08:00:00'),
-    ('gf_s22_miora_k1_leave', 'group22_k1', 's22_miora', 'LEAVE', '2024-06-30 12:00:00'),
-    ('gf_s22_miora_tn1_join', 'group22_tn1', 's22_miora', 'JOIN', '2024-09-01 08:00:00'),
-    ('gf_s22_tiana_k1_join', 'group22_k1', 's22_tiana', 'JOIN', '2022-09-01 08:00:00'),
-    ('gf_s22_toky_k2_join', 'group22_k2', 's22_toky', 'JOIN', '2022-09-01 08:00:00'),
-    ('gf_s22_naina_k1_join', 'group22_k1', 's22_naina', 'JOIN', '2022-09-01 08:00:00'),
-    ('gf_s22_feno_k2_join', 'group22_k2', 's22_feno', 'JOIN', '2022-09-01 08:00:00'),
-    ('gf_s22_hery_tn1_join', 'group22_tn1', 's22_hery', 'JOIN', '2022-09-01 08:00:00'),
-    ('gf_s22_sitraka_tn1_join', 'group22_tn1', 's22_sitraka', 'JOIN', '2022-09-01 08:00:00'),
-    ('gf_s23_andry_k1_join', 'group23_k1', 's23_andry', 'JOIN', '2023-09-01 08:00:00'),
-    ('gf_s23_hasina_k1_join', 'group23_k1', 's23_hasina', 'JOIN', '2023-09-01 08:00:00'),
-    ('gf_s23_fanja_k2_join', 'group23_k2', 's23_fanja', 'JOIN', '2023-09-01 08:00:00'),
-    ('gf_s23_rina_k2_join', 'group23_k2', 's23_rina', 'JOIN', '2023-09-01 08:00:00'),
-    ('gf_s23_tahiry_k2_join', 'group23_k2', 's23_tahiry', 'JOIN', '2023-09-01 08:00:00'),
-    ('gf_s23_vonjy_k1_join', 'group23_k1', 's23_vonjy', 'JOIN', '2023-09-01 08:00:00'),
-    ('gf_s23_zo_tn1_join', 'group23_tn1', 's23_zo', 'JOIN', '2023-09-01 08:00:00'),
-    ('gf_s23_lala_tn1_join', 'group23_tn1', 's23_lala', 'JOIN', '2023-09-01 08:00:00');
+    ('gf_s22_lova_g1_join', 'groupG1', 's22_lova', 'JOIN', '2022-09-01 08:00:00'),
+    ('gf_s22_lova_g1_leave', 'groupG1', 's22_lova', 'LEAVE', '2023-08-31 12:00:00'),
+    ('gf_s22_lova_g2_join', 'groupG2', 's22_lova', 'JOIN', '2023-09-01 08:00:00'),
+    ('gf_s22_lova_g2_leave', 'groupG2', 's22_lova', 'LEAVE', '2024-08-31 12:00:00'),
+    ('gf_s22_lova_g1_rejoin', 'groupG1', 's22_lova', 'JOIN', '2024-09-01 08:00:00'),
+    ('gf_s22_tiana_g5_join', 'groupG5', 's22_tiana', 'JOIN', '2022-09-01 08:00:00'),
+    ('gf_s22_tiana_g5_leave', 'groupG5', 's22_tiana', 'LEAVE', '2023-08-31 12:00:00'),
+    ('gf_s22_tiana_g1_join', 'groupG1', 's22_tiana', 'JOIN', '2023-09-01 08:00:00'),
+    ('gf_s22_tiana_g1_leave', 'groupG1', 's22_tiana', 'LEAVE', '2024-08-31 12:00:00'),
+    ('gf_s22_tiana_g2_join', 'groupG2', 's22_tiana', 'JOIN', '2024-09-01 08:00:00'),
+    ('gf_s22_miora_g1_join', 'groupG1', 's22_miora', 'JOIN', '2022-09-01 08:00:00'),
+    ('gf_s22_miora_g1_leave', 'groupG1', 's22_miora', 'LEAVE', '2024-06-30 12:00:00'),
+    ('gf_s22_miora_g3_join', 'groupG3', 's22_miora', 'JOIN', '2024-09-01 08:00:00'),
+    ('gf_s22_toky_g2_join', 'groupG2', 's22_toky', 'JOIN', '2022-09-01 08:00:00'),
+    ('gf_s22_toky_g2_leave', 'groupG2', 's22_toky', 'LEAVE', '2024-08-31 12:00:00'),
+    ('gf_s22_toky_g1_join', 'groupG1', 's22_toky', 'JOIN', '2024-09-01 08:00:00'),
+    ('gf_s22_naina_g4_join', 'groupG4', 's22_naina', 'JOIN', '2022-09-01 08:00:00'),
+    ('gf_s22_naina_g4_leave', 'groupG4', 's22_naina', 'LEAVE', '2023-08-31 12:00:00'),
+    ('gf_s22_naina_g2_join', 'groupG2', 's22_naina', 'JOIN', '2023-09-01 08:00:00'),
+    ('gf_s22_naina_g2_leave', 'groupG2', 's22_naina', 'LEAVE', '2024-08-31 12:00:00'),
+    ('gf_s22_naina_g1_join', 'groupG1', 's22_naina', 'JOIN', '2024-09-01 08:00:00'),
+    ('gf_s22_feno_g2_join', 'groupG2', 's22_feno', 'JOIN', '2022-09-01 08:00:00'),
+    ('gf_s22_feno_g2_leave', 'groupG2', 's22_feno', 'LEAVE', '2024-08-31 12:00:00'),
+    ('gf_s22_feno_g1_join', 'groupG1', 's22_feno', 'JOIN', '2024-09-01 08:00:00'),
+    ('gf_s22_hery_g3_join', 'groupG3', 's22_hery', 'JOIN', '2022-09-01 08:00:00'),
+    ('gf_s22_sitraka_g4_join', 'groupG4', 's22_sitraka', 'JOIN', '2022-09-01 08:00:00'),
+    ('gf_s22_sitraka_g4_leave', 'groupG4', 's22_sitraka', 'LEAVE', '2023-08-31 12:00:00'),
+    ('gf_s22_sitraka_g3_join', 'groupG3', 's22_sitraka', 'JOIN', '2023-09-01 08:00:00'),
+    ('gf_s23_andry_j1_join', 'groupJ1', 's23_andry', 'JOIN', '2023-09-01 08:00:00'),
+    ('gf_s23_andry_j1_leave', 'groupJ1', 's23_andry', 'LEAVE', '2025-01-31 12:00:00'),
+    ('gf_s23_andry_j2_join', 'groupJ2', 's23_andry', 'JOIN', '2025-02-01 08:00:00'),
+    ('gf_s23_hasina_j1_join', 'groupJ1', 's23_hasina', 'JOIN', '2023-09-01 08:00:00'),
+    ('gf_s23_fanja_j2_join', 'groupJ2', 's23_fanja', 'JOIN', '2023-09-01 08:00:00'),
+    ('gf_s23_rina_j2_join', 'groupJ2', 's23_rina', 'JOIN', '2023-09-01 08:00:00'),
+    ('gf_s23_tahiry_j2_join', 'groupJ2', 's23_tahiry', 'JOIN', '2023-09-01 08:00:00'),
+    ('gf_s23_tahiry_j2_leave', 'groupJ2', 's23_tahiry', 'LEAVE', '2025-01-31 12:00:00'),
+    ('gf_s23_tahiry_j3_join', 'groupJ3', 's23_tahiry', 'JOIN', '2025-02-01 08:00:00'),
+    ('gf_s23_vonjy_j3_join', 'groupJ3', 's23_vonjy', 'JOIN', '2023-09-01 08:00:00'),
+    ('gf_s23_zo_j4_join', 'groupJ4', 's23_zo', 'JOIN', '2023-09-01 08:00:00'),
+    ('gf_s23_zo_j4_leave', 'groupJ4', 's23_zo', 'LEAVE', '2024-08-31 12:00:00'),
+    ('gf_s23_zo_j3_join', 'groupJ3', 's23_zo', 'JOIN', '2024-09-01 08:00:00'),
+    ('gf_s23_lala_j5_join', 'groupJ5', 's23_lala', 'JOIN', '2023-09-01 08:00:00'),
+    ('gf_s23_lala_j5_leave', 'groupJ5', 's23_lala', 'LEAVE', '2024-08-31 12:00:00'),
+    ('gf_s23_lala_j1_join', 'groupJ1', 's23_lala', 'JOIN', '2024-09-01 08:00:00'),
+    ('gf_s23_lala_j1_leave', 'groupJ1', 's23_lala', 'LEAVE', '2025-01-31 12:00:00'),
+    ('gf_s23_lala_j2_join', 'groupJ2', 's23_lala', 'JOIN', '2025-02-01 08:00:00'),
+    ('gf_s24_mialy_k1_join', 'groupK1', 's24_mialy', 'JOIN', '2024-09-01 08:00:00'),
+    ('gf_s24_anto_k1_join', 'groupK1', 's24_anto', 'JOIN', '2024-09-01 08:00:00'),
+    ('gf_s24_bema_k2_join', 'groupK2', 's24_bema', 'JOIN', '2024-09-01 08:00:00'),
+    ('gf_s24_cecil_k2_join', 'groupK2', 's24_cecil', 'JOIN', '2024-09-01 08:00:00'),
+    ('gf_s24_dina_k3_join', 'groupK3', 's24_dina', 'JOIN', '2024-09-01 08:00:00'),
+    ('gf_s24_ela_k4_join', 'groupK4', 's24_ela', 'JOIN', '2024-09-01 08:00:00'),
+    ('gf_s24_fetra_k4_join', 'groupK4', 's24_fetra', 'JOIN', '2024-09-01 08:00:00'),
+    ('gf_s24_gaby_k5_join', 'groupK5', 's24_gaby', 'JOIN', '2024-09-01 08:00:00');
 
   -- ============================================================ grades
   -- Student profiles:
@@ -163,7 +268,8 @@ begin
   --   base 11/12/13    -> passing student (every grade >= 10).
   --   base 6.5         -> failing student (every grade < 10).
   --   skip_course_code -> no final exam grade on this course (provisional transcript).
-  --   skip_year        -> no final exam grade on semester 2 of this school year (provisional transcript).
+  --   skip_year        -> no final exam grade on semester 2 of this school year
+  --                       (provisional transcript, e.g. s23_zo: S4 grades "not started yet").
   create temp table seed_profiles (
     student_id text primary key, base numeric(3, 1), jitter int,
     skip_course_code text, skip_year int
@@ -172,7 +278,7 @@ begin
     ('s22_lova', 13, 7, null, null),
     ('s22_tiana', 11, 7, null, null),
     ('s22_miora', 12, 7, null, null),
-    ('s22_toky', 6.5, 7, null, null),
+    ('s22_toky', 11, 7, null, null),
     ('s22_naina', 11, 7, null, 2024),
     ('s22_feno', 11, 7, 'PROG6', null),
     ('s22_hery', 11, 7, null, null),
@@ -182,14 +288,23 @@ begin
     ('s23_fanja', 11, 7, null, null),
     ('s23_rina', 12, 7, null, null),
     ('s23_tahiry', 6.5, 7, null, null),
-    ('s23_vonjy', 6.5, 7, null, null),
-    ('s23_zo', 11, 7, null, 2023),
-    ('s23_lala', 11, 7, 'WEB2', null);
+    ('s23_vonjy', 11, 7, null, null),
+    ('s23_zo', 11, 7, null, 2024),
+    ('s23_lala', 11, 7, 'WEB2', null),
+    ('s24_mialy', 12, 7, null, null),
+    ('s24_anto', 12, 7, null, null),
+    ('s24_bema', 11, 7, null, null),
+    ('s24_cecil', 11, 7, 'WEB1', null),
+    ('s24_dina', 13, 7, null, null),
+    ('s24_ela', 12, 7, null, null),
+    ('s24_fetra', 11, 7, null, null),
+    ('s24_gaby', 11, 7, null, null);
 
   -- A grade is inserted for every (student, exam) pair where the student was
   -- member of the course's group at the start of the school year (last JOIN
-  -- before September 1st of year + 1), so group switches are honored
-  -- automatically (e.g. s22_miora follows TN courses in year 2024).
+  -- before September 1st of year + 1), so group switches and the L2 S4 track
+  -- choice are honored automatically (e.g. s22_miora follows TN courses in
+  -- year 2024, s23_andry follows EL courses from the 2025 mid-year choice).
   insert into grade (id, exam_id, student_id, score, is_final)
   select 'grade_' || e.id || '_' || s.id,
          e.id,
@@ -226,8 +341,8 @@ begin
   -- ============================================================ grade_history
   insert into grade_history (id, grade_id, old_score, new_score, changed_at, comment)
   select 'gh_s22_lova_prog4_1', g.id, 0.0, g.score, '2025-01-22 10:30:00',
-         'Première saisie après correction collective'
+         'Premiere saisie apres correction collective'
   from grade g
-  where g.id = 'grade_exam_ca_prog4_2023_promo2022_K2_final_s22_lova';
+  where g.id = 'grade_exam_ca_prog4_2023_promG_G2_final_s22_lova';
 end
 $$;
