@@ -183,13 +183,15 @@ class GraduatesIT extends FacadeITMockedThirdParties {
   }
 
   private void saveFlow(Group group, User student, FlowType flowType, int year) {
+    String date =
+        flowType == FlowType.LEAVE ? year + "-08-31T12:00:00Z" : year + "-09-01T08:00:00Z";
     groupFlowRepository.save(
         GroupFlow.builder()
             .id(randomUUID().toString())
             .group(group)
             .student(student)
             .flowType(flowType)
-            .flowDatetime(Instant.parse(year + "-09-01T08:00:00Z"))
+            .flowDatetime(Instant.parse(date))
             .build());
   }
 

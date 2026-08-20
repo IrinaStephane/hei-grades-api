@@ -6,7 +6,6 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import school.hei.api.model.CourseAssignment;
@@ -45,21 +44,36 @@ public class StudentCurriculumService {
     return years;
   }
 
-  public Optional<Group> groupForYear(String studentId, int year) {
-    return groupFlowRepository.findByStudentIdOrderByFlowDatetimeAsc(studentId).stream()
+  public List<Group> groupsForYear(String studentId, int year) {
+    var flows = groupFlowRepository.findByStudentIdOrderByFlowDatetimeAsc(studentId);
+    Instant start = schoolYearStart(year);
+    Instant end = schoolYearStart(year + 1);
+    return flows.stream()
         .filter(f -> f.getFlowType() == FlowType.JOIN)
-        .filter(f -> f.getFlowDatetime().isBefore(schoolYearStart(year + 1)))
-        .max(Comparator.comparing(GroupFlow::getFlowDatetime))
-        .map(GroupFlow::getGroup);
+        .filter(f -> f.getFlowDatetime().isBefore(end))
+        .filter(f -> overlapsSchoolYear(flows, f, start))
+        .map(GroupFlow::getGroup)
+        .distinct()
+        .toList();
+  }
+
+  private static boolean overlapsSchoolYear(List<GroupFlow> flows, GroupFlow join, Instant start) {
+    Instant leave =
+        flows.stream()
+            .filter(f -> f.getFlowType() == FlowType.LEAVE)
+            .filter(f -> f.getGroup().getId().equals(join.getGroup().getId()))
+            .filter(f -> f.getFlowDatetime().isAfter(join.getFlowDatetime()))
+            .map(GroupFlow::getFlowDatetime)
+            .min(Comparator.naturalOrder())
+            .orElse(null);
+    return leave == null || leave.isAfter(start);
   }
 
   public List<CourseAssignment> assignmentsForYear(String studentId, int year) {
-    var group = groupForYear(studentId, year).orElse(null);
-    if (group == null) {
-      return List.of();
-    }
-    return courseAssignmentRepository.findByGroupId(group.getId()).stream()
+    return groupsForYear(studentId, year).stream()
+        .flatMap(group -> courseAssignmentRepository.findByGroupId(group.getId()).stream())
         .filter(a -> a.getYear() != null && a.getYear() == year)
+        .distinct()
         .toList();
   }
 
