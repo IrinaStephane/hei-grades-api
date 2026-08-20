@@ -3,13 +3,17 @@ package school.hei.api.endpoint.rest.controller;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import school.hei.api.endpoint.rest.model.GradeCreationRequest;
 import school.hei.api.endpoint.rest.model.GradeUpdateRequest;
 import school.hei.api.endpoint.rest.security.model.Principal;
 import school.hei.api.model.enums.Role;
@@ -30,6 +34,19 @@ public class GradeController {
       @RequestParam(required = false) String examId) {
     return gradeService.get(
         studentId, examId, principal.getUserId(), Role.valueOf(principal.getRole()));
+  }
+
+  @PostMapping("/api/grades")
+  @ResponseStatus(HttpStatus.CREATED)
+  public Grade createGrade(
+      @AuthenticationPrincipal Principal principal, @Valid @RequestBody GradeCreationRequest body) {
+    return gradeService.create(
+        body.examId(),
+        body.studentId(),
+        body.score(),
+        body.isFinal(),
+        principal.getUserId(),
+        Role.valueOf(principal.getRole()));
   }
 
   @GetMapping("/api/grades/{id}")

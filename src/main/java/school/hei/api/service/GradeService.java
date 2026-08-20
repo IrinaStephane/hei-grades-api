@@ -8,12 +8,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import school.hei.api.model.CourseAssignment;
 import school.hei.api.model.enums.Role;
+import school.hei.api.model.exception.BadRequestException;
+import school.hei.api.model.exception.ConflictException;
 import school.hei.api.model.exception.ForbiddenException;
 import school.hei.api.model.exception.NotFoundException;
 import school.hei.api.repository.CourseAssignmentRepository;
 import school.hei.api.repository.ExamRepository;
 import school.hei.api.repository.GradeHistoryRepository;
 import school.hei.api.repository.GradeRepository;
+import school.hei.api.repository.UserRepository;
+import school.hei.api.repository.model.Exam;
 import school.hei.api.repository.model.Grade;
 import school.hei.api.repository.model.GradeHistory;
 
@@ -25,6 +29,7 @@ public class GradeService {
   private final GradeHistoryRepository gradeHistoryRepository;
   private final ExamRepository examRepository;
   private final CourseAssignmentRepository courseAssignmentRepository;
+  private final UserRepository userRepository;
 
   public List<Grade> get(
       String studentId, String examId, String authenticatedUserId, Role authenticatedRole) {
@@ -43,6 +48,47 @@ public class GradeService {
     return grade;
   }
 
+  public Grade create(
+      String examId,
+      String studentId,
+      Double score,
+      Boolean isFinal,
+      String authenticatedUserId,
+      Role authenticatedRole) {
+    if (authenticatedRole == Role.STUDENT) {
+      throw new ForbiddenException("A student cannot create grades");
+    }
+    if (authenticatedRole == Role.TEACHER) {
+      var exam =
+          examRepository
+              .findById(examId)
+              .orElseThrow(() -> new NotFoundException("Exam with id " + examId + " not found"));
+      if (!isOwnedByTeacher(exam, authenticatedUserId)) {
+        throw new ForbiddenException("A teacher can only create grades for their own courses");
+      }
+    }
+    examRepository
+        .findById(examId)
+        .orElseThrow(() -> new NotFoundException("Exam with id " + examId + " not found"));
+    if (!userRepository.existsById(studentId)) {
+      throw new BadRequestException("Student with id " + studentId + " not found");
+    }
+    if (gradeRepository.existsByExamIdAndStudentId(examId, studentId)) {
+      throw new ConflictException(
+          "A grade already exists for exam " + examId + " and student " + studentId);
+    }
+
+    var grade =
+        Grade.builder()
+            .id(UUID.randomUUID().toString())
+            .examId(examId)
+            .studentId(studentId)
+            .score(score)
+            .isFinal(isFinal != null && isFinal)
+            .build();
+    return gradeRepository.save(grade);
+  }
+
   @Transactional
   public Grade update(
       String id,
@@ -54,6 +100,8 @@ public class GradeService {
     var grade = getEntityById(id);
     assertCanWrite(grade, authenticatedUserId, authenticatedRole);
     var oldScore = grade.getScore();
+    boolean scoreChanged = !java.util.Objects.equals(oldScore, newScore);
+    boolean isFinalChanged = isFinal != null && grade.isFinal() != isFinal;
 
     grade.setScore(newScore);
     if (isFinal != null) {
@@ -61,15 +109,17 @@ public class GradeService {
     }
     var saved = gradeRepository.save(grade);
 
-    gradeHistoryRepository.save(
-        GradeHistory.builder()
-            .id(UUID.randomUUID().toString())
-            .gradeId(saved.getId())
-            .oldScore(oldScore)
-            .newScore(newScore)
-            .changedAt(Instant.now())
-            .comment(comment)
-            .build());
+    if (scoreChanged || isFinalChanged) {
+      gradeHistoryRepository.save(
+          GradeHistory.builder()
+              .id(UUID.randomUUID().toString())
+              .gradeId(saved.getId())
+              .oldScore(oldScore)
+              .newScore(newScore)
+              .changedAt(Instant.now())
+              .comment(comment)
+              .build());
+    }
 
     return saved;
   }
@@ -146,7 +196,13 @@ public class GradeService {
   private boolean isOwnedByTeacher(Grade grade, String teacherId) {
     return examRepository
         .findById(grade.getExamId())
-        .flatMap(exam -> courseAssignmentRepository.findById(exam.getCourseAssignmentId()))
+        .map(exam -> isOwnedByTeacher(exam, teacherId))
+        .orElse(false);
+  }
+
+  private boolean isOwnedByTeacher(Exam exam, String teacherId) {
+    return courseAssignmentRepository
+        .findById(exam.getCourseAssignmentId())
         .map(assignment -> assignment.getTeacher().getId().equals(teacherId))
         .orElse(false);
   }
