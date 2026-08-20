@@ -252,6 +252,18 @@ class GraduatesIT extends FacadeITMockedThirdParties {
   }
 
   @Test
+  void graduates_reject_invalid_path_with_400() {
+    var response =
+        restTemplate.exchange(
+            apiUrl(localPort, "/promotions/" + promotion.getId() + "/graduates?path=XYZ"),
+            HttpMethod.GET,
+            new HttpEntity<>(authHeaders(admin)),
+            Object.class);
+
+    assertStatus(HttpStatus.BAD_REQUEST, response);
+  }
+
+  @Test
   void graduates_export_returns_302() {
     var response =
         restTemplate.exchange(

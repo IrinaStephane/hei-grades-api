@@ -31,7 +31,8 @@ class PdfTranscriptGeneratorTest {
   private final ExamRepository examRepository = mock(ExamRepository.class);
   private final GradeRepository gradeRepository = mock(GradeRepository.class);
   private final StudentCurriculumService studentCurriculumService =
-      new StudentCurriculumService(groupFlowRepository, courseAssignmentRepository);
+      new StudentCurriculumService(
+          groupFlowRepository, courseAssignmentRepository, examRepository, gradeRepository);
   private final PdfTranscriptGenerator subject =
       new PdfTranscriptGenerator(studentCurriculumService, examRepository, gradeRepository);
 

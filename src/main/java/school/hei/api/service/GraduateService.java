@@ -16,6 +16,7 @@ import school.hei.api.model.Promotion;
 import school.hei.api.model.User;
 import school.hei.api.model.enums.FlowType;
 import school.hei.api.model.enums.Path;
+import school.hei.api.model.exception.BadRequestException;
 import school.hei.api.model.exception.NotFoundException;
 import school.hei.api.repository.ExamRepository;
 import school.hei.api.repository.GradeRepository;
@@ -131,7 +132,12 @@ public class GraduateService {
 
     List<Group> groups;
     if (path != null) {
-      Path pathEnum = Path.valueOf(path);
+      Path pathEnum;
+      try {
+        pathEnum = Path.valueOf(path);
+      } catch (IllegalArgumentException e) {
+        throw new BadRequestException("Invalid path: " + path);
+      }
       groups = allGroups.stream().filter(g -> g.getPath() == pathEnum).toList();
     } else {
       groups = allGroups;

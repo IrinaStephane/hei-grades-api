@@ -5,7 +5,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import school.hei.api.model.CourseAssignment;
@@ -13,6 +15,8 @@ import school.hei.api.model.Group;
 import school.hei.api.model.GroupFlow;
 import school.hei.api.model.enums.FlowType;
 import school.hei.api.repository.CourseAssignmentRepository;
+import school.hei.api.repository.ExamRepository;
+import school.hei.api.repository.GradeRepository;
 import school.hei.api.repository.GroupFlowRepository;
 
 @Service
@@ -23,6 +27,8 @@ public class StudentCurriculumService {
 
   private final GroupFlowRepository groupFlowRepository;
   private final CourseAssignmentRepository courseAssignmentRepository;
+  private final ExamRepository examRepository;
+  private final GradeRepository gradeRepository;
 
   public List<Integer> schoolYearsOf(String studentId) {
     var flows = groupFlowRepository.findByStudentIdOrderByFlowDatetimeAsc(studentId);
@@ -70,11 +76,33 @@ public class StudentCurriculumService {
   }
 
   public List<CourseAssignment> assignmentsForYear(String studentId, int year) {
-    return groupsForYear(studentId, year).stream()
-        .flatMap(group -> courseAssignmentRepository.findByGroupId(group.getId()).stream())
-        .filter(a -> a.getYear() != null && a.getYear() == year)
-        .distinct()
-        .toList();
+    List<CourseAssignment> assignments =
+        groupsForYear(studentId, year).stream()
+            .flatMap(group -> courseAssignmentRepository.findByGroupId(group.getId()).stream())
+            .filter(a -> a.getYear() != null && a.getYear() == year)
+            .distinct()
+            .toList();
+    return keepBestAssignmentPerCourse(studentId, assignments);
+  }
+
+  private List<CourseAssignment> keepBestAssignmentPerCourse(
+      String studentId, List<CourseAssignment> assignments) {
+    Map<String, CourseAssignment> bestByCourse = new LinkedHashMap<>();
+    for (CourseAssignment assignment : assignments) {
+      bestByCourse.merge(
+          assignment.getCourse().getId(),
+          assignment,
+          (current, candidate) -> hasGrade(studentId, current) ? current : candidate);
+    }
+    return new ArrayList<>(bestByCourse.values());
+  }
+
+  private boolean hasGrade(String studentId, CourseAssignment assignment) {
+    return examRepository.findByCourseAssignmentId(assignment.getId()).stream()
+        .anyMatch(
+            exam ->
+                gradeRepository.findByExamId(exam.getId()).stream()
+                    .anyMatch(g -> g.getStudentId().equals(studentId)));
   }
 
   public List<CourseAssignment> allAssignments(String studentId) {
