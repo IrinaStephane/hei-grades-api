@@ -52,6 +52,46 @@ class UserIT extends FacadeITMockedThirdParties {
     assertValidUUID(created.getId());
     assertEquals(userEmail, created.getEmail());
     assertEquals(Role.STUDENT, created.getRole());
+    assertTrue(created.getMatricule().matches("STD\\d{5}"));
+  }
+
+  @Test
+  void admin_creates_students_with_sequential_matricules() {
+    var first = createUser(adminToken, aUserCreation(randomEmail(), Role.STUDENT));
+    var second = createUser(adminToken, aUserCreation(randomEmail(), Role.STUDENT));
+
+    assertStatus(HttpStatus.CREATED, first);
+    assertStatus(HttpStatus.CREATED, second);
+    assertTrue(first.getBody().getMatricule().matches("STD\\d{5}"));
+    assertTrue(second.getBody().getMatricule().matches("STD\\d{5}"));
+    assertEquals(
+        seqOf(first.getBody().getMatricule(), 3) + 1, seqOf(second.getBody().getMatricule(), 3));
+  }
+
+  @Test
+  void admin_creates_teacher_with_sequential_matricules() {
+    var first = createUser(adminToken, aUserCreation(randomEmail(), Role.TEACHER));
+    var second = createUser(adminToken, aUserCreation(randomEmail(), Role.TEACHER));
+
+    assertStatus(HttpStatus.CREATED, first);
+    assertStatus(HttpStatus.CREATED, second);
+    assertTrue(first.getBody().getMatricule().matches("TEACH\\d{2}"));
+    assertTrue(second.getBody().getMatricule().matches("TEACH\\d{2}"));
+    assertEquals(
+        seqOf(first.getBody().getMatricule(), 2) + 1, seqOf(second.getBody().getMatricule(), 2));
+  }
+
+  @Test
+  void admin_creates_admin_with_sequential_matricules() {
+    var first = createUser(adminToken, aUserCreation(randomEmail(), Role.ADMIN));
+    var second = createUser(adminToken, aUserCreation(randomEmail(), Role.ADMIN));
+
+    assertStatus(HttpStatus.CREATED, first);
+    assertStatus(HttpStatus.CREATED, second);
+    assertTrue(first.getBody().getMatricule().matches("ADMIN\\d{2}"));
+    assertTrue(second.getBody().getMatricule().matches("ADMIN\\d{2}"));
+    assertEquals(
+        seqOf(first.getBody().getMatricule(), 2) + 1, seqOf(second.getBody().getMatricule(), 2));
   }
 
   @Test
@@ -190,13 +230,25 @@ class UserIT extends FacadeITMockedThirdParties {
   }
 
   private UserCreation aUserCreation() {
+    return aUserCreation(userEmail, Role.STUDENT);
+  }
+
+  private UserCreation aUserCreation(String email, Role role) {
     return UserCreation.builder()
         .firstName("Student")
         .lastName("Test")
-        .email(userEmail)
+        .email(email)
         .password("password123")
-        .role(Role.STUDENT)
+        .role(role)
         .build();
+  }
+
+  private String randomEmail() {
+    return "new-" + randomUUID() + "@hei.school";
+  }
+
+  private static int seqOf(String matricule, int width) {
+    return Integer.parseInt(matricule.substring(matricule.length() - width));
   }
 
   private ResponseEntity<UserRest> createUser(String token, UserCreation creation) {
