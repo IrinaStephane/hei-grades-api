@@ -1,6 +1,8 @@
 package school.hei.api.integration;
 
 import static java.util.UUID.randomUUID;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static school.hei.api.integration.conf.ApiAssertions.assertStatus;
 import static school.hei.api.integration.conf.TestUtils.NOT_EXISTING_ID;
 import static school.hei.api.integration.conf.TestUtils.apiUrl;
@@ -13,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import school.hei.api.integration.conf.FacadeITMockedThirdParties;
 import school.hei.api.model.User;
 import school.hei.api.model.enums.Role;
+import software.amazon.awssdk.services.eventbridge.model.PutEventsRequest;
+import software.amazon.awssdk.services.eventbridge.model.PutEventsResponse;
 
 class TranscriptIT extends FacadeITMockedThirdParties {
 
@@ -23,6 +27,8 @@ class TranscriptIT extends FacadeITMockedThirdParties {
   void setUp() {
     admin = saveUser(Role.ADMIN, "transcript-admin-" + randomUUID() + "@hei.school");
     student = saveUser(Role.STUDENT, "transcript-student-" + randomUUID() + "@hei.school");
+    when(eventBridgeClientMock.putEvents(any(PutEventsRequest.class)))
+        .thenReturn(PutEventsResponse.builder().build());
   }
 
   @Test

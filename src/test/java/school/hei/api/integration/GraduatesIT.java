@@ -4,11 +4,17 @@ import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import static school.hei.api.integration.conf.ApiAssertions.assertStatus;
 import static school.hei.api.integration.conf.TestUtils.apiUrl;
 
+import java.net.URI;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +23,8 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import school.hei.api.file.hash.FileHash;
+import school.hei.api.file.hash.FileHashAlgorithm;
 import school.hei.api.integration.conf.FacadeITMockedThirdParties;
 import school.hei.api.model.Course;
 import school.hei.api.model.CourseAssignment;
@@ -53,12 +61,18 @@ class GraduatesIT extends FacadeITMockedThirdParties {
   private Promotion promotion;
   private Group group;
 
+  @SneakyThrows
   @BeforeEach
   void setUp() {
     admin = saveUser(Role.ADMIN, "grad-admin-" + randomUUID() + "@hei.school");
     teacher = saveUser(Role.TEACHER, "grad-teacher-" + randomUUID() + "@hei.school");
     student1 = saveUser(Role.STUDENT, "grad-s1-" + randomUUID() + "@hei.school");
     student2 = saveUser(Role.STUDENT, "grad-s2-" + randomUUID() + "@hei.school");
+
+    when(bucketComponent.upload(any(), anyString()))
+        .thenReturn(new FileHash(FileHashAlgorithm.NONE, null));
+    when(bucketComponent.presign(anyString(), any(Duration.class)))
+        .thenReturn(URI.create("https://s3.example.com/presigned").toURL());
 
     promotion =
         promotionRepository.save(

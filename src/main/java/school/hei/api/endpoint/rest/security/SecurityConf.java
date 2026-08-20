@@ -115,10 +115,10 @@ public class SecurityConf {
                     .requestMatchers(GET, "/users/*/group_flows")
                     .hasAnyRole(TEACHER.name(), ADMIN.name())
                     // transcript
+                    .requestMatchers(new SelfMatcher(POST, "/api/users/*/transcript", "users"))
+                    .hasAnyRole(STUDENT.name(), TEACHER.name(), ADMIN.name())
                     .requestMatchers(POST, "/api/users/*/transcript")
                     .hasAnyRole(TEACHER.name(), ADMIN.name())
-                    .requestMatchers(new SelfMatcher(POST, "/api/users/*/transcript", "users"))
-                    .hasRole(STUDENT.name())
                     // grades
                     .requestMatchers(GET, "/api/grades")
                     .hasAnyRole(STUDENT.name(), TEACHER.name(), ADMIN.name())
