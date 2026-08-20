@@ -379,6 +379,71 @@ class GraduateServiceTest {
   }
 
   @Test
+  void keeps_grades_from_both_groups_when_student_changes_group_mid_year() {
+    promotion(2022);
+    var g1 = group("g1", Path.EL);
+    var g2 = group("g2", Path.EL);
+    var g3 = group("g3", Path.TN);
+    var c1 = course("c1", "C1", 30);
+    var c2 = course("c2", "C2", 30);
+    var c3 = course("c3", "C3", 30);
+    var c4 = course("c4", "C4", 30);
+    var a1 = assignment("a1", c1, g1, 2022);
+    var a2 = assignment("a2", c2, g3, 2022);
+    var a3 = assignment("a3", c3, g1, 2023);
+    var a4 = assignment("a4", c4, g1, 2024);
+    var e1 = exam("e1", "a1");
+    var e2 = exam("e2", "a2");
+    var e3 = exam("e3", "a3");
+    var e4 = exam("e4", "a4");
+    when(groupRepository.findByPromotionId(PROMO_ID)).thenReturn(List.of(g1, g2, g3));
+    when(courseAssignmentRepository.findByGroupId("g1")).thenReturn(List.of(a1, a3, a4));
+    when(courseAssignmentRepository.findByGroupId("g2")).thenReturn(List.of());
+    when(courseAssignmentRepository.findByGroupId("g3")).thenReturn(List.of(a2));
+    when(examRepository.findByCourseAssignmentId("a1")).thenReturn(List.of(e1));
+    when(examRepository.findByCourseAssignmentId("a2")).thenReturn(List.of(e2));
+    when(examRepository.findByCourseAssignmentId("a3")).thenReturn(List.of(e3));
+    when(examRepository.findByCourseAssignmentId("a4")).thenReturn(List.of(e4));
+
+    var s1 = student("s1");
+    when(groupFlowRepository.findByStudentIdOrderByFlowDatetimeAsc("s1"))
+        .thenReturn(
+            List.of(
+                flow("f1", g1, "s1", FlowType.JOIN, "2022-09-01T08:00:00Z"),
+                flow("f2", g1, "s1", FlowType.LEAVE, "2023-01-15T08:00:00Z"),
+                flow("f3", g3, "s1", FlowType.JOIN, "2023-01-16T08:00:00Z"),
+                flow("f4", g3, "s1", FlowType.LEAVE, "2023-08-31T12:00:00Z"),
+                flow("f5", g1, "s1", FlowType.JOIN, "2023-09-01T08:00:00Z"),
+                flow("f6", g1, "s1", FlowType.JOIN, "2024-09-01T08:00:00Z")));
+    when(groupFlowRepository.findByGroupIdOrderByFlowDatetimeAsc("g1"))
+        .thenReturn(
+            List.of(
+                flow("f1", g1, "s1", FlowType.JOIN, "2022-09-01T08:00:00Z"),
+                flow("f2", g1, "s1", FlowType.LEAVE, "2023-01-15T08:00:00Z"),
+                flow("f5", g1, "s1", FlowType.JOIN, "2023-09-01T08:00:00Z"),
+                flow("f6", g1, "s1", FlowType.JOIN, "2024-09-01T08:00:00Z")));
+    when(groupFlowRepository.findByGroupIdOrderByFlowDatetimeAsc("g2")).thenReturn(List.of());
+    when(groupFlowRepository.findByGroupIdOrderByFlowDatetimeAsc("g3"))
+        .thenReturn(
+            List.of(
+                flow("f3", g3, "s1", FlowType.JOIN, "2023-01-16T08:00:00Z"),
+                flow("f4", g3, "s1", FlowType.LEAVE, "2023-08-31T12:00:00Z")));
+    when(gradeRepository.findByExamId("e1")).thenReturn(List.of(grade("g1", "e1", "s1", 15.0)));
+    when(gradeRepository.findByExamId("e2")).thenReturn(List.of(grade("g2", "e2", "s1", 14.0)));
+    when(gradeRepository.findByExamId("e3")).thenReturn(List.of(grade("g3", "e3", "s1", 16.0)));
+    when(gradeRepository.findByExamId("e4")).thenReturn(List.of(grade("g4", "e4", "s1", 15.0)));
+
+    var graduates = subject.getGraduates(PROMO_ID, null);
+
+    assertEquals(1, graduates.size());
+    var graduate = graduates.get(0);
+    assertEquals("s1", graduate.getStudentId());
+    assertEquals(4, graduate.getResults().size());
+    assertEquals(List.of(2022, 2023, 2024), graduate.getResultYears());
+    assertEquals(15.0, graduate.getGeneralAverage(), 0.001);
+  }
+
+  @Test
   void excludes_student_whose_latest_flow_is_leave() {
     promotion(2022);
     var g1 = group("g1", Path.EL);

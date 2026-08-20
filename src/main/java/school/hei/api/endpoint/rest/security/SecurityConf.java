@@ -91,6 +91,8 @@ public class SecurityConf {
             auth ->
                 auth.requestMatchers("/ping", "/health/**", "/graduates", "/auth/login")
                     .permitAll()
+                    .requestMatchers("/promotions/*/graduates/export")
+                    .permitAll()
                     .requestMatchers(OPTIONS, "/**")
                     .permitAll()
                     .requestMatchers(GET, "/whoami")
@@ -149,8 +151,6 @@ public class SecurityConf {
                     .hasRole(ADMIN.name())
                     // graduates
                     .requestMatchers(GET, "/promotions/*/graduates")
-                    .hasRole(ADMIN.name())
-                    .requestMatchers(GET, "/promotions/*/graduates/export")
                     .hasRole(ADMIN.name())
                     // promotions
                     .requestMatchers(GET, "/promotions")
