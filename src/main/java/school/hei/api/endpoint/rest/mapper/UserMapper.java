@@ -16,6 +16,7 @@ public class UserMapper {
         .firstName(user.getFirstName())
         .lastName(user.getLastName())
         .email(user.getEmail())
+        .matricule(user.getMatricule())
         .role(user.getRole())
         .createdAt(user.getCreatedAt())
         .build();

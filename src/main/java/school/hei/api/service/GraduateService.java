@@ -47,6 +47,7 @@ public class GraduateService {
   @Getter
   public static class Graduate {
     private final String studentId;
+    private final String studentMatricule;
     private final String firstName;
     private final String lastName;
     private final String path;
@@ -55,7 +56,7 @@ public class GraduateService {
     private final List<Integer> resultYears;
   }
 
-  private record StudentInfo(String id, String firstName, String lastName) {}
+  private record StudentInfo(String id, String firstName, String lastName, String matricule) {}
 
   public List<Graduate> getGraduates(String promotionId, String path) {
     var promotion =
@@ -118,6 +119,7 @@ public class GraduateService {
 
     return Graduate.builder()
         .studentId(student.id())
+        .studentMatricule(student.matricule() == null ? student.id() : student.matricule())
         .firstName(student.firstName())
         .lastName(student.lastName())
         .path(path)
@@ -163,7 +165,9 @@ public class GraduateService {
 
       if (latestFlow != null && latestFlow.getFlowType() == FlowType.JOIN) {
         User student = latestFlow.getStudent();
-        students.add(new StudentInfo(studentId, student.getFirstName(), student.getLastName()));
+        students.add(
+            new StudentInfo(
+                studentId, student.getFirstName(), student.getLastName(), student.getMatricule()));
       }
     }
 

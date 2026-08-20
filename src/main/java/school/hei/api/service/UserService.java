@@ -1,6 +1,8 @@
 package school.hei.api.service;
 
 import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -40,6 +42,7 @@ public class UserService {
     if (userRepository.existsByEmail(creation.getEmail())) {
       throw new ConflictException("Email " + creation.getEmail() + " is already in use");
     }
+    Instant createdAt = Instant.now();
     User user =
         User.builder()
             .firstName(creation.getFirstName())
@@ -47,9 +50,32 @@ public class UserService {
             .email(creation.getEmail())
             .passwordHash(passwordEncoder.encode(creation.getPassword()))
             .role(creation.getRole())
-            .createdAt(Instant.now())
+            .matricule(generateMatricule(creation.getRole(), createdAt))
+            .createdAt(createdAt)
             .build();
     return userRepository.save(user);
+  }
+
+  private String generateMatricule(Role role, Instant createdAt) {
+    if (role == Role.STUDENT) {
+      String prefix =
+          "STD" + DateTimeFormatter.ofPattern("yy").format(createdAt.atZone(ZoneOffset.UTC));
+      return prefix + String.format("%03d", nextSequence(prefix, 3));
+    }
+    if (role == Role.TEACHER) {
+      return "TEACH" + String.format("%02d", nextSequence("TEACH", 2));
+    }
+    return "ADMIN" + String.format("%02d", nextSequence("ADMIN", 2));
+  }
+
+  private int nextSequence(String prefix, int width) {
+    return userRepository.findAll().stream()
+            .map(User::getMatricule)
+            .filter(m -> m != null && m.startsWith(prefix))
+            .mapToInt(m -> Integer.parseInt(m.substring(m.length() - width)))
+            .max()
+            .orElse(0)
+        + 1;
   }
 
   @Transactional
