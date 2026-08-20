@@ -6,28 +6,30 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.HtmlUtils;
 import school.hei.api.model.CourseAssignment;
 import school.hei.api.model.User;
-import school.hei.api.repository.CourseAssignmentRepository;
 import school.hei.api.repository.ExamRepository;
 import school.hei.api.repository.GradeRepository;
-import school.hei.api.repository.GroupFlowRepository;
+import school.hei.api.repository.model.Exam;
+import school.hei.api.repository.model.Grade;
+import school.hei.api.service.StudentCurriculumService;
 
 @Component
 @AllArgsConstructor
 public class PdfTranscriptGenerator {
 
-  private final GroupFlowRepository groupFlowRepository;
-  private final CourseAssignmentRepository courseAssignmentRepository;
+  private final StudentCurriculumService studentCurriculumService;
   private final ExamRepository examRepository;
   private final GradeRepository gradeRepository;
 
   public File generate(User student, Integer year) {
     try {
-      var courses = computeCourses(student, year);
+      var courses = computeCourses(student.getId(), year);
       double generalAverage = computeGeneralAverage(courses);
       int totalCredits = computeTotalCredits(courses);
       String status = computeStatus(student.getId());
@@ -46,26 +48,14 @@ public class PdfTranscriptGenerator {
     }
   }
 
-  private List<CourseTranscript> computeCourses(User student, Integer year) {
-    var flows = groupFlowRepository.findByStudentIdOrderByFlowDatetimeAsc(student.getId());
-    List<String> groupIds = flows.stream().map(f -> f.getGroup().getId()).distinct().toList();
-
-    List<CourseAssignment> uniqueAssignments =
-        groupIds.stream()
-            .flatMap(gid -> courseAssignmentRepository.findByGroupId(gid).stream())
-            .collect(
-                java.util.stream.Collectors.toMap(CourseAssignment::getId, a -> a, (a, b) -> a))
-            .values()
-            .stream()
-            .toList();
-
-    List<CourseAssignment> filteredAssignments =
+  private List<CourseTranscript> computeCourses(String studentId, Integer year) {
+    List<CourseAssignment> assignments =
         year != null
-            ? uniqueAssignments.stream().filter(a -> a.getYear().equals(year)).toList()
-            : uniqueAssignments;
+            ? studentCurriculumService.assignmentsForYear(studentId, year, null)
+            : studentCurriculumService.allAssignments(studentId, null);
 
     List<CourseTranscript> result = new ArrayList<>();
-    for (CourseAssignment assignment : filteredAssignments) {
+    for (CourseAssignment assignment : assignments) {
       var course = assignment.getCourse();
       var exams = examRepository.findByCourseAssignmentId(assignment.getId());
       double finalGrade =
@@ -75,7 +65,7 @@ public class PdfTranscriptGenerator {
                     var grades = gradeRepository.findByExamId(exam.getId());
                     var studentGrade =
                         grades.stream()
-                            .filter(g -> g.getStudentId().equals(student.getId()))
+                            .filter(g -> g.getStudentId().equals(studentId))
                             .findFirst()
                             .map(g -> g.getScore())
                             .orElse(0.0);
@@ -111,13 +101,22 @@ public class PdfTranscriptGenerator {
         .sum();
   }
 
-  private String computeStatus(String studentId) {
-    var grades = gradeRepository.findByStudentId(studentId);
-    if (grades.isEmpty()) {
+  String computeStatus(String studentId) {
+    var assignments = studentCurriculumService.allAssignments(studentId, null);
+    List<String> expectedExamIds =
+        assignments.stream()
+            .flatMap(a -> examRepository.findByCourseAssignmentId(a.getId()).stream())
+            .map(Exam::getId)
+            .toList();
+    if (expectedExamIds.isEmpty()) {
       return "PROVISOIRE";
     }
-    boolean allFinal = grades.stream().allMatch(g -> g.isFinal());
-    return allFinal ? "COMPLET" : "PROVISOIRE";
+    Set<String> actualExamIds =
+        gradeRepository.findByStudentId(studentId).stream()
+            .map(Grade::getExamId)
+            .collect(Collectors.toSet());
+    boolean complete = expectedExamIds.stream().allMatch(actualExamIds::contains);
+    return complete ? "COMPLET" : "PROVISOIRE";
   }
 
   private String buildHtml(

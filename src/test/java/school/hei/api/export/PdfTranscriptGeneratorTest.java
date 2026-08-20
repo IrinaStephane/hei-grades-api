@@ -1,5 +1,6 @@
 package school.hei.api.export;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -20,6 +21,7 @@ import school.hei.api.repository.GradeRepository;
 import school.hei.api.repository.GroupFlowRepository;
 import school.hei.api.repository.model.Exam;
 import school.hei.api.repository.model.Grade;
+import school.hei.api.service.StudentCurriculumService;
 
 class PdfTranscriptGeneratorTest {
 
@@ -28,9 +30,10 @@ class PdfTranscriptGeneratorTest {
       mock(CourseAssignmentRepository.class);
   private final ExamRepository examRepository = mock(ExamRepository.class);
   private final GradeRepository gradeRepository = mock(GradeRepository.class);
+  private final StudentCurriculumService studentCurriculumService =
+      new StudentCurriculumService(groupFlowRepository, courseAssignmentRepository);
   private final PdfTranscriptGenerator subject =
-      new PdfTranscriptGenerator(
-          groupFlowRepository, courseAssignmentRepository, examRepository, gradeRepository);
+      new PdfTranscriptGenerator(studentCurriculumService, examRepository, gradeRepository);
 
   private static User aStudent() {
     return User.builder()
@@ -44,18 +47,21 @@ class PdfTranscriptGeneratorTest {
         .build();
   }
 
+  private static GroupFlow aJoinFlow(Group group, User student, String at) {
+    return GroupFlow.builder()
+        .id("f1")
+        .group(group)
+        .student(student)
+        .flowType(FlowType.JOIN)
+        .flowDatetime(Instant.parse(at))
+        .build();
+  }
+
   @Test
   void generate_with_year_produces_pdf_file() {
     var student = aStudent();
     var group = Group.builder().id("g1").ref("K1").path(Path.EL).build();
-    var flow =
-        GroupFlow.builder()
-            .id("f1")
-            .group(group)
-            .student(student)
-            .flowType(FlowType.JOIN)
-            .flowDatetime(Instant.now())
-            .build();
+    var flow = aJoinFlow(group, student, "2025-09-01T08:00:00Z");
     when(groupFlowRepository.findByStudentIdOrderByFlowDatetimeAsc("s1")).thenReturn(List.of(flow));
     when(courseAssignmentRepository.findByGroupId("g1")).thenReturn(List.of());
 
@@ -71,14 +77,7 @@ class PdfTranscriptGeneratorTest {
   void generate_without_year_produces_pdf_file() {
     var student = aStudent();
     var group = Group.builder().id("g1").ref("K1").path(Path.EL).build();
-    var flow =
-        GroupFlow.builder()
-            .id("f1")
-            .group(group)
-            .student(student)
-            .flowType(FlowType.JOIN)
-            .flowDatetime(Instant.now())
-            .build();
+    var flow = aJoinFlow(group, student, "2025-09-01T08:00:00Z");
     when(groupFlowRepository.findByStudentIdOrderByFlowDatetimeAsc("s1")).thenReturn(List.of(flow));
     when(courseAssignmentRepository.findByGroupId("g1")).thenReturn(List.of());
 
@@ -92,14 +91,7 @@ class PdfTranscriptGeneratorTest {
   void generate_with_courses_shows_transcript_data() {
     var student = aStudent();
     var group = Group.builder().id("g1").ref("K1").path(Path.EL).build();
-    var flow =
-        GroupFlow.builder()
-            .id("f1")
-            .group(group)
-            .student(student)
-            .flowType(FlowType.JOIN)
-            .flowDatetime(Instant.now())
-            .build();
+    var flow = aJoinFlow(group, student, "2025-09-01T08:00:00Z");
     var assignment =
         CourseAssignment.builder()
             .id("ca1")
@@ -132,50 +124,64 @@ class PdfTranscriptGeneratorTest {
   }
 
   @Test
-  void compute_status_provisoire_when_non_final_grades() {
+  void status_is_provisoire_when_an_expected_exam_is_not_graded() {
     var student = aStudent();
     var group = Group.builder().id("g1").ref("K1").path(Path.EL).build();
-    var flow =
-        GroupFlow.builder()
-            .id("f1")
+    var flow = aJoinFlow(group, student, "2025-09-01T08:00:00Z");
+    var assignment =
+        CourseAssignment.builder()
+            .id("ca1")
             .group(group)
-            .student(student)
-            .flowType(FlowType.JOIN)
-            .flowDatetime(Instant.now())
+            .course(
+                school.hei.api.model.Course.builder()
+                    .id("c1")
+                    .code("INF101")
+                    .title("Math")
+                    .credits(30)
+                    .build())
+            .year(2025)
+            .semester(2)
             .build();
-    var grade =
-        Grade.builder().id("g1").examId("e1").studentId("s1").score(15.0).isFinal(false).build();
+    var exam =
+        Exam.builder().id("e1").courseAssignmentId("ca1").coefficient(1.0).title("Final").build();
 
     when(groupFlowRepository.findByStudentIdOrderByFlowDatetimeAsc("s1")).thenReturn(List.of(flow));
-    when(courseAssignmentRepository.findByGroupId("g1")).thenReturn(List.of());
-    when(gradeRepository.findByStudentId("s1")).thenReturn(List.of(grade));
+    when(courseAssignmentRepository.findByGroupId("g1")).thenReturn(List.of(assignment));
+    when(examRepository.findByCourseAssignmentId("ca1")).thenReturn(List.of(exam));
+    when(gradeRepository.findByStudentId("s1")).thenReturn(List.of());
 
-    var file = subject.generate(student, 2025);
-
-    assertTrue(file.exists());
+    assertEquals("PROVISOIRE", subject.computeStatus("s1"));
   }
 
   @Test
-  void compute_status_complet_when_all_final_grades() {
+  void status_is_complet_when_all_expected_exams_are_graded() {
     var student = aStudent();
     var group = Group.builder().id("g1").ref("K1").path(Path.EL).build();
-    var flow =
-        GroupFlow.builder()
-            .id("f1")
+    var flow = aJoinFlow(group, student, "2025-09-01T08:00:00Z");
+    var assignment =
+        CourseAssignment.builder()
+            .id("ca1")
             .group(group)
-            .student(student)
-            .flowType(FlowType.JOIN)
-            .flowDatetime(Instant.now())
+            .course(
+                school.hei.api.model.Course.builder()
+                    .id("c1")
+                    .code("INF101")
+                    .title("Math")
+                    .credits(30)
+                    .build())
+            .year(2025)
+            .semester(2)
             .build();
+    var exam =
+        Exam.builder().id("e1").courseAssignmentId("ca1").coefficient(1.0).title("Final").build();
     var grade =
         Grade.builder().id("g1").examId("e1").studentId("s1").score(15.0).isFinal(true).build();
 
     when(groupFlowRepository.findByStudentIdOrderByFlowDatetimeAsc("s1")).thenReturn(List.of(flow));
-    when(courseAssignmentRepository.findByGroupId("g1")).thenReturn(List.of());
+    when(courseAssignmentRepository.findByGroupId("g1")).thenReturn(List.of(assignment));
+    when(examRepository.findByCourseAssignmentId("ca1")).thenReturn(List.of(exam));
     when(gradeRepository.findByStudentId("s1")).thenReturn(List.of(grade));
 
-    var file = subject.generate(student, 2025);
-
-    assertTrue(file.exists());
+    assertEquals("COMPLET", subject.computeStatus("s1"));
   }
 }

@@ -12,26 +12,25 @@ import org.springframework.stereotype.Service;
 import school.hei.api.model.CourseAssignment;
 import school.hei.api.model.Group;
 import school.hei.api.model.GroupFlow;
+import school.hei.api.model.Promotion;
 import school.hei.api.model.User;
 import school.hei.api.model.enums.FlowType;
 import school.hei.api.model.enums.Path;
-import school.hei.api.repository.CourseAssignmentRepository;
-import school.hei.api.repository.CourseRepository;
+import school.hei.api.model.exception.NotFoundException;
 import school.hei.api.repository.ExamRepository;
 import school.hei.api.repository.GradeRepository;
 import school.hei.api.repository.GroupFlowRepository;
 import school.hei.api.repository.GroupRepository;
-import school.hei.api.repository.UserRepository;
+import school.hei.api.repository.PromotionRepository;
 
 @Service
 @AllArgsConstructor
 public class GraduateService {
 
-  private final UserRepository userRepository;
+  private final PromotionRepository promotionRepository;
+  private final StudentCurriculumService studentCurriculumService;
   private final GroupRepository groupRepository;
   private final GroupFlowRepository groupFlowRepository;
-  private final CourseAssignmentRepository courseAssignmentRepository;
-  private final CourseRepository courseRepository;
   private final ExamRepository examRepository;
   private final GradeRepository gradeRepository;
 
@@ -52,51 +51,66 @@ public class GraduateService {
     private final String path;
     private final double generalAverage;
     private final List<CourseResult> results;
+    private final List<Integer> resultYears;
   }
 
-  private record StudentInfo(String id, String firstName, String lastName, List<String> groupIds) {}
+  private record StudentInfo(String id, String firstName, String lastName) {}
 
   public List<Graduate> getGraduates(String promotionId, String path) {
-    var students = studentsOfPromotion(promotionId, path);
+    var promotion =
+        promotionRepository
+            .findById(promotionId)
+            .orElseThrow(() -> new NotFoundException("Promotion " + promotionId + " not found"));
+    List<Integer> schoolYears = schoolYearsOf(promotion);
+    if (schoolYears.isEmpty()) {
+      return List.of();
+    }
 
-    return students.stream()
-        .map(student -> toGraduate(student, path))
+    return studentsOfPromotion(promotionId, path).stream()
+        .map(student -> toGraduate(student, path, schoolYears))
         .filter(g -> !g.getResults().isEmpty())
+        .filter(g -> g.getResultYears().containsAll(schoolYears))
         .filter(g -> g.getResults().stream().allMatch(r -> r.getFinalGrade() >= 10))
         .sorted(Comparator.comparingDouble(Graduate::getGeneralAverage).reversed())
         .toList();
   }
 
-  private Graduate toGraduate(StudentInfo student, String path) {
-    var assignments = courseAssignmentsForGroups(student.groupIds(), path);
+  private Graduate toGraduate(StudentInfo student, String path, List<Integer> schoolYears) {
+    Path pathEnum = path == null ? null : Path.valueOf(path);
 
-    var results =
-        assignments.stream()
-            .map(
-                assignment -> {
-                  var course = assignment.getCourse();
-                  var exams = examRepository.findByCourseAssignmentId(assignment.getId());
-                  double finalGrade =
-                      exams.stream()
-                          .mapToDouble(
-                              exam -> {
-                                var grades = gradeRepository.findByExamId(exam.getId());
-                                var studentGrade =
-                                    grades.stream()
-                                        .filter(g -> g.getStudentId().equals(student.id()))
-                                        .findFirst()
-                                        .map(g -> g.getScore())
-                                        .orElse(0.0);
-                                return studentGrade * exam.getCoefficient();
-                              })
-                          .sum();
-                  return CourseResult.builder()
-                      .courseId(course.getId())
-                      .credits(course.getCredits())
-                      .finalGrade(finalGrade)
-                      .build();
-                })
-            .toList();
+    List<CourseResult> results = new ArrayList<>();
+    List<Integer> resultYears = new ArrayList<>();
+    for (int year : schoolYears) {
+      var assignments = studentCurriculumService.assignmentsForYear(student.id(), year, pathEnum);
+      if (assignments.isEmpty()) {
+        continue;
+      }
+      resultYears.add(year);
+      for (CourseAssignment assignment : assignments) {
+        var course = assignment.getCourse();
+        var exams = examRepository.findByCourseAssignmentId(assignment.getId());
+        double finalGrade =
+            exams.stream()
+                .mapToDouble(
+                    exam -> {
+                      var grades = gradeRepository.findByExamId(exam.getId());
+                      var studentGrade =
+                          grades.stream()
+                              .filter(g -> g.getStudentId().equals(student.id()))
+                              .findFirst()
+                              .map(g -> g.getScore())
+                              .orElse(0.0);
+                      return studentGrade * exam.getCoefficient();
+                    })
+                .sum();
+        results.add(
+            CourseResult.builder()
+                .courseId(course.getId())
+                .credits(course.getCredits())
+                .finalGrade(finalGrade)
+                .build());
+      }
+    }
 
     double sumCredits = results.stream().mapToInt(CourseResult::getCredits).sum();
     double weightedSum =
@@ -110,6 +124,7 @@ public class GraduateService {
         .path(path)
         .generalAverage(average)
         .results(results)
+        .resultYears(resultYears)
         .build();
   }
 
@@ -143,30 +158,23 @@ public class GraduateService {
           flows.stream().max(Comparator.comparing(GroupFlow::getFlowDatetime)).orElse(null);
 
       if (latestFlow != null && latestFlow.getFlowType() == FlowType.JOIN) {
-        List<String> groupIds = flows.stream().map(f -> f.getGroup().getId()).distinct().toList();
         User student = latestFlow.getStudent();
-        students.add(
-            new StudentInfo(studentId, student.getFirstName(), student.getLastName(), groupIds));
+        students.add(new StudentInfo(studentId, student.getFirstName(), student.getLastName()));
       }
     }
 
     return students;
   }
 
-  private List<CourseAssignment> courseAssignmentsForGroups(List<String> groupIds, String path) {
-    List<CourseAssignment> uniqueAssignments =
-        groupIds.stream()
-            .flatMap(gid -> courseAssignmentRepository.findByGroupId(gid).stream())
-            .collect(
-                java.util.stream.Collectors.toMap(CourseAssignment::getId, a -> a, (a, b) -> a))
-            .values()
-            .stream()
-            .toList();
-
-    if (path != null) {
-      Path pathEnum = Path.valueOf(path);
-      return uniqueAssignments.stream().filter(a -> a.getGroup().getPath() == pathEnum).toList();
+  private List<Integer> schoolYearsOf(Promotion promotion) {
+    Integer entryYear = promotion.getEntryYear();
+    if (entryYear == null) {
+      return List.of();
     }
-    return uniqueAssignments;
+    List<Integer> years = new ArrayList<>();
+    for (int i = 0; i < StudentCurriculumService.CURRICULUM_LENGTH_IN_YEARS; i++) {
+      years.add(entryYear + i);
+    }
+    return years;
   }
 }
